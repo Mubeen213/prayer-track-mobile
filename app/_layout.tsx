@@ -5,7 +5,7 @@ import '../styles/global.css'
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <SafeAreaView className="flex-1 bg-gray-50 pt-8"edges={['left', 'right', 'bottom']}
+      <SafeAreaView className="flex-1 bg-gray-50 pt-10" edges={['left', 'right', 'bottom']}
       >
       <Slot />
       </SafeAreaView>
