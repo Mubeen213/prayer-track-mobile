@@ -1,44 +1,45 @@
-import React from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
-import { Mosque } from '../types/mosque'
-import { CheckCircle, Building2, MapPin, Bookmark } from 'lucide-react-native'
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import { Mosque } from "../types/mosque";
+import { CheckCircle, Landmark, MapPin, Bookmark } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface MosqueCardProps {
-  mosque: Mosque
-  onPress?: (mosque: Mosque) => void
-  isFavorite?: boolean
-  onToggleFavorite?: (mosqueId: string) => void
+  mosque: Mosque;
+  onPress?: (mosque: Mosque) => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: (mosqueId: string) => void;
 }
 
-export const MosqueCard: React.FC<MosqueCardProps> = ({ 
-  mosque, 
+export const MosqueCard: React.FC<MosqueCardProps> = ({
+  mosque,
   onPress,
-  isFavorite = false,
-  onToggleFavorite 
+  isFavorite = true,
+  onToggleFavorite,
 }) => {
   const getNextPrayer = () => {
-    const now = new Date()
-    const currentTime = now.getHours() * 60 + now.getMinutes()
-    
-    const nextPrayer = mosque.prayer_timings.find(prayer => {
-      const [hours, minutes] = prayer.jamaat_time.split(':').map(Number)
-      const prayerTime = hours * 60 + minutes
-      return prayerTime > currentTime
-    })
-    
-    return nextPrayer || mosque.prayer_timings[0]
-  }
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
 
-  const nextPrayer = getNextPrayer()
+    const nextPrayer = mosque.prayer_timings.find((prayer) => {
+      const [hours, minutes] = prayer.jamaat_time.split(":").map(Number);
+      const prayerTime = hours * 60 + minutes;
+      return prayerTime > currentTime;
+    });
+
+    return nextPrayer || mosque.prayer_timings[0];
+  };
+
+  const nextPrayer = getNextPrayer();
 
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       className="bg-white rounded-2xl p-6 mx-4 my-2 shadow-sm border border-gray-100"
       onPress={() => onPress?.(mosque)}
       activeOpacity={0.7}
     >
       {/* Verified Badge */}
-      {mosque.status === 'active' && (
+      {mosque.status === "active" && (
         <View className="absolute right-0 top-0 z-10 flex-row items-center bg-green-500 rounded-bl-lg px-3 py-1.5">
           <CheckCircle size={14} color="white" />
           <Text className="text-white text-xs font-medium ml-1">Verified</Text>
@@ -48,14 +49,24 @@ export const MosqueCard: React.FC<MosqueCardProps> = ({
       {/* Header */}
       <View className="flex-row items-start mb-4 mr-16">
         <View className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-3 mr-4">
-          <Building2 size={24} color="white" />
+          <LinearGradient
+            colors={["#22c55e", "#059669"]}
+            start={[0, 0]}
+            end={[1, 1]}
+            className="rounded-full p-2"
+          >
+            <Landmark size={20} color="white" />
+          </LinearGradient>
         </View>
-        
+
         <View className="flex-1">
-          <Text className="text-lg font-semibold text-gray-900 mb-1" numberOfLines={2}>
+          <Text
+            className="text-lg font-semibold text-gray-900 mb-1"
+            numberOfLines={2}
+          >
             {mosque.name}
           </Text>
-          
+
           <View className="flex-row items-start">
             <MapPin size={16} color="#10B981" className="mt-0.5 mr-1.5" />
             <Text className="text-sm text-gray-600 flex-1" numberOfLines={2}>
@@ -84,28 +95,30 @@ export const MosqueCard: React.FC<MosqueCardProps> = ({
       )}
 
       {/* Action Buttons */}
-      <View className="flex-row items-center">
-        <View className="flex-1 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg mr-2">
-          <Text className="text-white text-center py-2 font-medium">
-            View Details
-          </Text>
+      <View className="flex-row items-center gap-2">
+        <View className="flex-1 rounded-lg  overflow-hidden">
+          <LinearGradient colors={["#22c55e", "#059669"]}>
+            <Text className="text-white text-center py-2 font-medium">
+              View Details
+            </Text>
+          </LinearGradient>
         </View>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           className="rounded-lg p-2 mr-2"
           onPress={() => onToggleFavorite?.(mosque.id)}
         >
-          <Bookmark 
-            size={20} 
+          <Bookmark
+            size={20}
             color={isFavorite ? "#10B981" : "#9CA3AF"}
             fill={isFavorite ? "#10B981" : "none"}
           />
         </TouchableOpacity>
-        
+
         <TouchableOpacity className="rounded-lg p-2">
           <MapPin size={20} color="#9CA3AF" />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
-  )
-}
+  );
+};

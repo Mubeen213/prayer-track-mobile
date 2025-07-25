@@ -4,7 +4,6 @@ import { MosquesResponse, Mosque } from '../types/mosque'
 
 interface MosqueQueryParams {
   search?: string
-  searchType?: 'name' | 'location'
   limit?: number
   enabled?: boolean
 }

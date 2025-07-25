@@ -1,14 +1,20 @@
-import React, { useEffect } from 'react'
-import { FlatList, RefreshControl, View, Text, ActivityIndicator } from 'react-native'
-import { Mosque } from '../types/mosque'
-import { MosqueCard } from './MosqueCard'
-import { useMosques } from '../hooks/useMosques'
+import React, { useEffect } from "react";
+import {
+  FlatList,
+  RefreshControl,
+  View,
+  Text,
+  ActivityIndicator,
+} from "react-native";
+import { Mosque } from "../types/mosque";
+import { MosqueCard } from "./MosqueCard";
+import { useMosques } from "../hooks/useMosques";
 
 interface MosqueListProps {
-  searchQuery: string
-  onMosquePress?: (mosque: Mosque) => void
-  onToggleFavorite?: (mosqueId: string) => void
-  favorites?: Record<string, boolean>
+  searchQuery: string;
+  onMosquePress?: (mosque: Mosque) => void;
+  onToggleFavorite?: (mosqueId: string) => void;
+  favorites?: Record<string, boolean>;
 }
 
 export const MosqueList: React.FC<MosqueListProps> = ({
@@ -29,34 +35,34 @@ export const MosqueList: React.FC<MosqueListProps> = ({
   } = useMosques({
     search: searchQuery,
     limit: 6,
-  })
+  });
 
-  const mosques = data?.pages.flatMap(page => page.mosques) || []
+  const mosques = data?.pages.flatMap((page) => page.mosques) || [];
 
   const renderMosque = ({ item }: { item: Mosque }) => (
-    <MosqueCard 
-      mosque={item} 
+    <MosqueCard
+      mosque={item}
       onPress={onMosquePress}
       isFavorite={favorites[item.id] || false}
       onToggleFavorite={onToggleFavorite}
     />
-  )
+  );
 
   const renderFooter = () => {
-    if (!isFetchingNextPage) return null
-    
+    if (!isFetchingNextPage) return null;
+
     return (
       <View className="py-4 items-center">
         <ActivityIndicator size="small" color="#10B981" />
       </View>
-    )
-  }
+    );
+  };
 
   const handleLoadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage()
+      fetchNextPage();
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -64,7 +70,7 @@ export const MosqueList: React.FC<MosqueListProps> = ({
         <ActivityIndicator size="large" color="#10B981" />
         <Text className="text-gray-600 mt-4">Loading mosques...</Text>
       </View>
-    )
+    );
   }
 
   if (isError) {
@@ -77,7 +83,7 @@ export const MosqueList: React.FC<MosqueListProps> = ({
           Pull down to refresh and try again
         </Text>
       </View>
-    )
+    );
   }
 
   if (mosques.length === 0) {
@@ -87,10 +93,12 @@ export const MosqueList: React.FC<MosqueListProps> = ({
           No mosques found
         </Text>
         <Text className="text-sm text-gray-600 text-center">
-          {searchQuery ? 'Try adjusting your search' : 'Pull down to refresh and load mosques'}
+          {searchQuery
+            ? "Try adjusting your search"
+            : "Pull down to refresh and load mosques"}
         </Text>
       </View>
-    )
+    );
   }
 
   return (
@@ -99,10 +107,10 @@ export const MosqueList: React.FC<MosqueListProps> = ({
       renderItem={renderMosque}
       keyExtractor={(item) => item.id}
       refreshControl={
-        <RefreshControl 
+        <RefreshControl
           refreshing={isRefetching}
           onRefresh={refetch}
-          colors={['#10B981']}
+          colors={["#10B981"]}
           tintColor="#10B981"
         />
       }
@@ -113,5 +121,5 @@ export const MosqueList: React.FC<MosqueListProps> = ({
       contentContainerStyle={{ paddingVertical: 8 }}
       showsVerticalScrollIndicator={false}
     />
-  )
-}
+  );
+};
