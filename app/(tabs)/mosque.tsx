@@ -9,8 +9,8 @@ import {
 import { MapPin } from "lucide-react-native";
 import { MosqueList } from "../../components/MosqueList";
 import { Mosque } from "../../types/mosque";
+import { getCurrentUserId } from "../../services/userService";
 
-// Change this from named export to default export
 export default function MosqueTab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [favorites] = useState<Record<string, boolean>>({}); // TODO: Implement favorites hook
@@ -67,12 +67,7 @@ export default function MosqueTab() {
       </View>
 
       {/* Mosque List */}
-      <MosqueList
-        searchQuery={searchQuery}
-        onMosquePress={handleMosquePress}
-        onToggleFavorite={handleToggleFavorite}
-        favorites={favorites}
-      />
+      <MosqueList searchQuery={searchQuery} />
     </SafeAreaView>
   );
 }

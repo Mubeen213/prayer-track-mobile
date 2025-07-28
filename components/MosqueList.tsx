@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback } from "react";
 import {
   FlatList,
   RefreshControl,
@@ -9,23 +9,22 @@ import {
 import { Mosque } from "../types/mosque";
 import { MosqueCard } from "./MosqueCard";
 import { useMosques } from "../hooks/useMosques";
+import {
+  useGetFavoritesStatus,
+  useFavoritesMutation,
+} from "../hooks/useFavorites";
+import { useAuth } from "../hooks/useAuth";
 
 interface MosqueListProps {
   searchQuery: string;
-  onMosquePress?: (mosque: Mosque) => void;
-  onToggleFavorite?: (mosqueId: string) => void;
-  favorites?: Record<string, boolean>;
 }
 
-export const MosqueList: React.FC<MosqueListProps> = ({
-  searchQuery,
-  onMosquePress,
-  onToggleFavorite,
-  favorites = {},
-}) => {
+export const MosqueList: React.FC<MosqueListProps> = ({ searchQuery }) => {
+  const { userId } = useAuth();
+
   const {
     data,
-    isLoading,
+    isLoading: isMosquesLoading,
     isError,
     fetchNextPage,
     hasNextPage,
@@ -39,12 +38,34 @@ export const MosqueList: React.FC<MosqueListProps> = ({
 
   const mosques = data?.pages.flatMap((page) => page.mosques) || [];
 
+  const { data: favoritesData, isLoading: isFavoritesLoading } =
+    useGetFavoritesStatus(userId) as {
+      data: Record<string, boolean> | undefined;
+      isLoading: boolean;
+    };
+
+  const favoriteMutation = useFavoritesMutation(userId);
+
+  const handleToggleFavorite = useCallback((mosqueId: string) => {
+    if (!userId) {
+      console.log("User not logged in, cannot toggle favorite");
+      return;
+    }
+    favoriteMutation.mutate(mosqueId);
+    console.log("Toggle favorite:", mosqueId);
+  }, []);
+
+  const handleMosquePress = useCallback((mosque: Mosque) => {
+    // TODO: Navigate to mosque details
+    console.log("Navigate to mosque:", mosque.id);
+  }, []);
+
   const renderMosque = ({ item }: { item: Mosque }) => (
     <MosqueCard
       mosque={item}
-      onPress={onMosquePress}
-      isFavorite={favorites[item.id] || false}
-      onToggleFavorite={onToggleFavorite}
+      onPress={handleMosquePress}
+      isFavorite={favoritesData?.[item.id] || false}
+      onToggleFavorite={handleToggleFavorite}
     />
   );
 
@@ -64,7 +85,7 @@ export const MosqueList: React.FC<MosqueListProps> = ({
     }
   };
 
-  if (isLoading) {
+  if (isMosquesLoading || isFavoritesLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-gray-50">
         <ActivityIndicator size="large" color="#10B981" />
