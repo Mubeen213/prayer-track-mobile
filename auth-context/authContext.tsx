@@ -20,9 +20,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const initAuth = async () => {
       try {
-        if (__DEV__) {
-          await SecureStore.deleteItemAsync("userId");
-        }
+        // if (__DEV__) {
+        //   await SecureStore.deleteItemAsync("userId");
+        // }
 
         const { userId, isNew } = await getOrCreateUserId();
 

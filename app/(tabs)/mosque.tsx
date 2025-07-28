@@ -8,25 +8,11 @@ import {
 } from "react-native";
 import { MapPin } from "lucide-react-native";
 import { MosqueList } from "../../components/MosqueList";
-import { Mosque } from "../../types/mosque";
-import { getCurrentUserId } from "../../services/userService";
 
 export default function MosqueTab() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [favorites] = useState<Record<string, boolean>>({}); // TODO: Implement favorites hook
-
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
-  }, []);
-
-  const handleMosquePress = useCallback((mosque: Mosque) => {
-    // TODO: Navigate to mosque details
-    console.log("Navigate to mosque:", mosque.id);
-  }, []);
-
-  const handleToggleFavorite = useCallback((mosqueId: string) => {
-    // TODO: Implement toggle favorite
-    console.log("Toggle favorite:", mosqueId);
   }, []);
 
   const handleNearbyPress = useCallback(() => {

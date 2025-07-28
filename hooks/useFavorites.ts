@@ -54,7 +54,6 @@ export const useGetFavoritesStatus = (userId: string | null) => {
         {} as Record<string, boolean>
       );
     },
-    staleTime: 5 * 60 * 1000,
     enabled: !!userId,
     refetchOnWindowFocus: false,
     retry: 1,
@@ -62,7 +61,7 @@ export const useGetFavoritesStatus = (userId: string | null) => {
 };
 
 // For FavoriteMosques page - returns full mosque data
-export const useGetFavorites = (userId: string | null) => {
+export const useGetFavoriteMosques = (userId: string | null) => {
   if (!userId) {
     return { data: [], isLoading: false, isError: false };
   }
@@ -72,7 +71,6 @@ export const useGetFavorites = (userId: string | null) => {
       const { data } = await api.get<FavoriteMosque[]>(`${GET_FAVORITES}`);
       return data;
     },
-    staleTime: 5 * 60 * 1000,
     enabled: !!userId,
     refetchOnWindowFocus: false,
     retry: 1,
