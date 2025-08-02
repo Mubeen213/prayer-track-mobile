@@ -7,7 +7,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import { MapPin } from "lucide-react-native";
-import { MosqueList } from "../../components/MosqueList";
+import { MosqueList } from "../../components/mosque/MosqueList";
 
 export default function MosqueTab() {
   const [searchQuery, setSearchQuery] = useState("");

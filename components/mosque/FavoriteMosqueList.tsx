@@ -1,11 +1,11 @@
 import React from "react";
 import { FlatList, View, Text, ActivityIndicator } from "react-native";
 import { MosqueCard } from "./MosqueCard";
-import { useGetFavoriteMosques } from "../hooks/useFavorites";
-import { useFavoritesMutation } from "../hooks/useFavorites";
-import { useAuth } from "../hooks/useAuth";
-import { Mosque } from "../types/mosque";
-import { FavoriteMosque } from "../types/favMosque";
+import { useGetFavoriteMosques } from "../../hooks/useFavorites";
+import { useFavoritesMutation } from "../../hooks/useFavorites";
+import { useAuth } from "../../hooks/useAuth";
+import { Mosque } from "../../types/mosque";
+import { FavoriteMosque } from "../../types/favMosque";
 
 export const FavoriteMosqueList = () => {
   const { userId } = useAuth();

@@ -1,6 +1,6 @@
 import React from "react";
 import { SafeAreaView, View, Text } from "react-native";
-import { FavoriteMosqueList } from "../../components/FavoriteMosqueList";
+import { FavoriteMosqueList } from "../../components/mosque/FavoriteMosqueList";
 
 export default function FavoriteTab() {
   return (

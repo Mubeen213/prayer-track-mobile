@@ -6,14 +6,14 @@ import {
   Text,
   ActivityIndicator,
 } from "react-native";
-import { Mosque } from "../types/mosque";
+import { Mosque } from "../../types/mosque";
 import { MosqueCard } from "./MosqueCard";
-import { useMosques } from "../hooks/useMosques";
+import { useMosques } from "../../hooks/useMosques";
 import {
   useGetFavoritesStatus,
   useFavoritesMutation,
-} from "../hooks/useFavorites";
-import { useAuth } from "../hooks/useAuth";
+} from "../../hooks/useFavorites";
+import { useAuth } from "../../hooks/useAuth";
 
 interface MosqueListProps {
   searchQuery: string;
