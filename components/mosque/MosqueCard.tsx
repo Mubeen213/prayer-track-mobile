@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { Mosque } from "../types/mosque";
+import { Mosque } from "../../types/mosque";
 import { CheckCircle, Landmark, MapPin, Bookmark } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
