@@ -20,10 +20,7 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
         <AuthProvider>
-          <SafeAreaView
-            className="flex-1 bg-gray-50 pt-10"
-            edges={["left", "right"]}
-          >
+          <SafeAreaView className="flex-1 pt-10" edges={["left", "right"]}>
             <Slot />
           </SafeAreaView>
         </AuthProvider>

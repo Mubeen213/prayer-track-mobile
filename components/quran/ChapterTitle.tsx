@@ -1,0 +1,25 @@
+import React from "react";
+import { View, Text } from "react-native";
+import { Chapter } from "../../types/quran";
+
+interface ChapterTitleProps {
+  chapter: Chapter;
+}
+
+export const ChapterTitle: React.FC<ChapterTitleProps> = ({ chapter }) => {
+  return (
+    <View className="px-4 py-8 bg-[#fafaf7]">
+      <View className="items-center">
+        <Text
+          className="text-3xl mb-2 text-center text-gray-900"
+          style={{ fontFamily: "amiri" }}
+        >
+          سورة {chapter.surah_name}
+        </Text>
+        <Text className="text-lg text-gray-600">
+          Chapter {chapter.surah_number}
+        </Text>
+      </View>
+    </View>
+  );
+};

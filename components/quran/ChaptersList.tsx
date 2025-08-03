@@ -1,5 +1,6 @@
 import React from "react";
 import { FlatList, View } from "react-native";
+import { router } from "expo-router";
 import { ChapterCard } from "./ChapterCard";
 
 interface Chapter {
@@ -9,13 +10,13 @@ interface Chapter {
 
 interface ChaptersListProps {
   chapters: Chapter[];
-  onChapterPress: (chapterNumber: number) => void;
 }
 
-export const ChaptersList: React.FC<ChaptersListProps> = ({
-  chapters,
-  onChapterPress,
-}) => {
+export const ChaptersList: React.FC<ChaptersListProps> = ({ chapters }) => {
+  const handleChapterPress = (chapterNumber: number) => {
+    router.push(`/chapter/${chapterNumber}`);
+  };
+
   return (
     <FlatList
       data={chapters}
@@ -24,11 +25,10 @@ export const ChaptersList: React.FC<ChaptersListProps> = ({
         <ChapterCard
           number={item.number}
           name={item.chapter}
-          onPress={() => onChapterPress(item.number)}
+          onPress={() => handleChapterPress(item.number)}
         />
       )}
       contentContainerStyle={{ padding: 16 }}
-      className="grid grid-cols-1 md:grid-cols-2 gap-4"
       showsVerticalScrollIndicator={false}
     />
   );

@@ -8,20 +8,11 @@ import chapters from "../../data/quran-chapters";
 export default function Quran() {
   const router = useRouter();
 
-  const handleChapterPress = (chapterNumber: number) => {
-    router.push(`/quran/${chapterNumber}`);
-  };
-
   const handleSearch = (query: string) => {
+    console.log("Search query:", query);
     if (query.includes(":")) {
       const [chapter, verse] = query.split(":").map((num) => parseInt(num));
-      router.push(`/quran/${chapter}?verse=${verse}`);
-      return;
-    }
-
-    const chapterNum = parseInt(query);
-    if (!isNaN(chapterNum)) {
-      router.push(`/quran/${chapterNum}`);
+      router.push(`/chapter/${chapter}/?verse=${verse}`);
       return;
     }
 
@@ -32,11 +23,11 @@ export default function Quran() {
     }
 
     const foundChapter = chapters.find((chapter: Chapter) =>
-      chapter.chapter.toLowerCase().includes(query.toLowerCase())
+      chapter.number.toString().includes(query.toLowerCase())
     );
 
     if (foundChapter) {
-      router.push(`/quran/${foundChapter.number}`);
+      router.push(`/chapter/${foundChapter.number}`);
     } else {
       Alert.alert("Not Found", "Chapter not found.");
     }
@@ -51,7 +42,7 @@ export default function Quran() {
 
         <SearchBar onSearch={handleSearch} />
 
-        <ChaptersList chapters={chapters} onChapterPress={handleChapterPress} />
+        <ChaptersList chapters={chapters} />
       </View>
     </SafeAreaView>
   );

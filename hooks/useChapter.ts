@@ -14,6 +14,7 @@ interface UseChapterReturn {
 export const useChapter = ({
   chapterNumber,
 }: UseChapterProps): UseChapterReturn => {
+  const cloudfrontUrl = process.env.EXPO_PUBLIC_QURAN_CLOUDFRONT_URL;
   const {
     data: chapter,
     isLoading,
@@ -21,10 +22,8 @@ export const useChapter = ({
   } = useQuery({
     queryKey: ["chapter", chapterNumber],
     queryFn: async () => {
-      // Replace with your actual API endpoint
-      const response = await fetch(
-        `YOUR_QURAN_API_URL/chapters/${chapterNumber}.json`
-      );
+      const url = `${cloudfrontUrl}/Quran/chapter-${chapterNumber}.json`;
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch chapter");
       }
