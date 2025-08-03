@@ -1,5 +1,9 @@
 import React from "react";
 import { View, Text } from "react-native";
+import {
+  useFonts,
+  ScheherazadeNew_400Regular,
+} from "@expo-google-fonts/scheherazade-new";
 
 interface VerseCardProps {
   ayah: {
@@ -25,6 +29,7 @@ export const VerseCard: React.FC<VerseCardProps> = ({
   toArabicNumeral,
   isHighlighted = false,
 }) => {
+  const [fontLoaded] = useFonts({ ScheherazadeNew_400Regular });
   return (
     <View
       className={`rounded-xl mb-2 shadow-sm border ${
@@ -38,7 +43,12 @@ export const VerseCard: React.FC<VerseCardProps> = ({
         <View className="flex-row-reverse items-start">
           <View className="flex-1">
             <Text
-              className={`${getFontSize(fontSize)} text-right leading-10 text-gray-900 font-amiri`}
+              className={`${getFontSize(fontSize)} text-right leading-[2.5] text-gray-900`}
+              style={{
+                fontFamily: fontLoaded
+                  ? "ScheherazadeNew_400Regular"
+                  : undefined,
+              }}
             >
               {ayah.arabic}
             </Text>
