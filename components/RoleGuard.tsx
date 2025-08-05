@@ -17,7 +17,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   const { hasRole, hasAnyRole } = useAuth();
 
   const hasAccess = requireAll
-    ? roles.every((role) => hasRole(role))
+    ? roles.some((role) => hasRole(role))
     : hasAnyRole(roles);
 
   if (!hasAccess) {
@@ -28,11 +28,11 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
 };
 
 // Convenience components for common roles
-export const AdminOnly: React.FC<{
+export const MosqueAdmin: React.FC<{
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }> = ({ children, fallback }) => (
-  <RoleGuard roles={["admin", "super_admin"]} fallback={fallback}>
+  <RoleGuard roles={["mosque_admin", "super_admin"]} fallback={fallback}>
     {children}
   </RoleGuard>
 );

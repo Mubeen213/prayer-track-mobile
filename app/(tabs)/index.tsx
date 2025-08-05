@@ -3,17 +3,25 @@ import { Text, View, ScrollView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { FeatureCard } from "../../components/common/FeatureCard";
-import { features } from "../../constants/features";
-import { useAuth } from "../../hooks/useAuth";
+import { features, adminFeatures } from "../../constants/features";
+import { useAuth, useRoles } from "../../hooks/useAuth";
 
 export default function Home() {
   const { user } = useAuth();
+  const { hasAnyRole } = useRoles();
+
+  const showAdminFeatures = hasAnyRole([
+    "admin_approver",
+    "super_admin",
+    "mosque_admin",
+  ]);
+
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 100 }}
     >
-      {/* Features Grid */}
+      {/* Header */}
       <View className="pt-8 px-4">
         <LinearGradient
           colors={["#667eea", "#764ba2"]}
@@ -51,11 +59,27 @@ export default function Home() {
             </View>
           </View>
         </LinearGradient>
+
+        {/* Main Features */}
         <View className="flex-1 justify-between gap-4 py-4">
           {features.map((feature) => (
             <FeatureCard key={feature.title} feature={feature} />
           ))}
         </View>
+
+        {/* Admin Features */}
+        {showAdminFeatures && (
+          <View className="mt-6">
+            <Text className="text-xl font-bold text-gray-900 mb-4">
+              Admin Tools
+            </Text>
+            <View className="gap-4">
+              {adminFeatures.map((feature) => (
+                <FeatureCard key={feature.title} feature={feature} />
+              ))}
+            </View>
+          </View>
+        )}
       </View>
     </ScrollView>
   );
