@@ -1,6 +1,8 @@
 import * as SecureStore from "expo-secure-store";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
+import { api } from "../config/axios";
+import { User } from "../types/user";
 
 export const getCurrentUserId = async (): Promise<string | null> => {
   try {
@@ -32,3 +34,43 @@ export async function getOrCreateUserId(): Promise<{
   }
   return { userId, isNew: false };
 }
+
+export const fetchUserData = async (userId: string): Promise<User | null> => {
+  try {
+    // Set the header for the request
+    api.defaults.headers.common["x-user-id"] = userId;
+
+    const response = await api.get("/auth/me");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return null;
+  }
+};
+
+export const storeUserData = async (user: User): Promise<void> => {
+  try {
+    await SecureStore.setItemAsync("userData", JSON.stringify(user));
+  } catch (error) {
+    console.error("Error storing user data:", error);
+  }
+};
+
+export const getStoredUserData = async (): Promise<User | null> => {
+  try {
+    const userData = await SecureStore.getItemAsync("userData");
+    return userData ? JSON.parse(userData) : null;
+  } catch (error) {
+    console.error("Error retrieving stored user data:", error);
+    return null;
+  }
+};
+
+export const clearUserData = async (): Promise<void> => {
+  try {
+    await SecureStore.deleteItemAsync("userData");
+    await SecureStore.deleteItemAsync("userId");
+  } catch (error) {
+    console.error("Error clearing user data:", error);
+  }
+};

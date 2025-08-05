@@ -3,7 +3,7 @@ import Toast from "react-native-toast-message";
 import { Slot } from "expo-router";
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "../auth-context/authContext";
+import { AuthProvider } from "../auth-context/AuthContext";
 import "../styles/global.css";
 
 const queryClient = new QueryClient({
