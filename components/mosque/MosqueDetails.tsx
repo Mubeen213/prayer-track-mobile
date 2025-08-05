@@ -1,6 +1,12 @@
 import React, { useState, useCallback } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { MosqueDetailSkeleton } from "../skeleton/MosqueDetailSkeleton";
 import { useMosque } from "../../hooks/useMosques";
 import {
@@ -10,9 +16,10 @@ import {
 import { useAuth } from "../../hooks/useAuth";
 import { MosqueTimings } from "./MosqueTimings";
 import { MosqueEvents } from "./MosqueEvents";
-import { Bookmark } from "lucide-react-native";
+import { Bookmark, ChevronLeft } from "lucide-react-native";
 
 export const MosqueDetails = () => {
+  const router = useRouter();
   const { userId } = useAuth();
   const [activeTab, setActiveTab] = useState<"timings" | "events">("timings");
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -26,13 +33,21 @@ export const MosqueDetails = () => {
   const favoriteMutation = useFavoritesMutation(userId);
 
   let isFavorite = favoritesData ? !!favoritesData[id || ""] : false;
-  const handleToggleFavorite = useCallback((mosqueId: string) => {
-    if (!userId) {
-      console.log("User not logged in, cannot toggle favorite");
-      return;
-    }
-    favoriteMutation.mutate(mosqueId);
-  }, []);
+
+  const handleToggleFavorite = useCallback(
+    (mosqueId: string) => {
+      if (!userId) {
+        console.log("User not logged in, cannot toggle favorite");
+        return;
+      }
+      favoriteMutation.mutate(mosqueId);
+    },
+    [userId, favoriteMutation]
+  );
+
+  const handleGoBack = () => {
+    router.push("/mosque");
+  };
 
   if (isLoadingMosque) {
     return <MosqueDetailSkeleton />;
@@ -47,6 +62,13 @@ export const MosqueDetails = () => {
           {/* Header */}
           <View className="p-4 border-b border-gray-100">
             <View className="flex-row items-center relative mb-2">
+              <TouchableOpacity
+                onPress={handleGoBack}
+                className="p-2 -ml-2"
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <ChevronLeft size={24} color="#374151" strokeWidth={1.5} />
+              </TouchableOpacity>
               <View className="flex-1 items-center">
                 <Text className="text-xl font-bold text-gray-900">
                   {mosque.name}
