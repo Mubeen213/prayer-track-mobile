@@ -14,6 +14,7 @@ import {
   useFavoritesMutation,
 } from "../../hooks/useFavorites";
 import { useAuth } from "../../hooks/useAuth";
+import { router } from "expo-router";
 
 interface MosqueListProps {
   searchQuery: string;
@@ -56,7 +57,7 @@ export const MosqueList: React.FC<MosqueListProps> = ({ searchQuery }) => {
   }, []);
 
   const handleMosquePress = useCallback((mosque: Mosque) => {
-    // TODO: Navigate to mosque details
+    router.push(`/mosque/${mosque.id}`);
     console.log("Navigate to mosque:", mosque.id);
   }, []);
 
