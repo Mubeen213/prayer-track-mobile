@@ -1,5 +1,6 @@
 import React from "react";
-import { FlatList, View } from "react-native";
+import { FlatList } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { ChapterCard } from "./ChapterCard";
 
@@ -16,6 +17,8 @@ export const ChaptersList: React.FC<ChaptersListProps> = ({ chapters }) => {
   const handleChapterPress = (chapterNumber: number) => {
     router.push(`/chapter/${chapterNumber}`);
   };
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = 80;
 
   return (
     <FlatList
@@ -28,7 +31,10 @@ export const ChaptersList: React.FC<ChaptersListProps> = ({ chapters }) => {
           onPress={() => handleChapterPress(item.number)}
         />
       )}
-      contentContainerStyle={{ padding: 16 }}
+      contentContainerStyle={{
+        padding: 16,
+        paddingBottom: insets.bottom + tabBarHeight + 100,
+      }}
       showsVerticalScrollIndicator={false}
     />
   );
