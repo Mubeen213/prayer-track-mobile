@@ -7,14 +7,7 @@ import { features, adminFeatures } from "../../constants/features";
 import { useAuth, useRoles } from "../../hooks/useAuth";
 
 export default function Home() {
-  const { user } = useAuth();
-  const { hasAnyRole } = useRoles();
-
-  const showAdminFeatures = hasAnyRole([
-    "admin_approver",
-    "super_admin",
-    "mosque_admin",
-  ]);
+  const { user, hasRole } = useAuth();
 
   return (
     <ScrollView
@@ -67,19 +60,27 @@ export default function Home() {
           ))}
         </View>
 
-        {/* Admin Features */}
-        {showAdminFeatures && (
-          <View className="mt-6">
-            <Text className="text-xl font-bold text-gray-900 mb-4">
-              Admin Tools
-            </Text>
-            <View className="gap-4">
-              {adminFeatures.map((feature) => (
-                <FeatureCard key={feature.title} feature={feature} />
-              ))}
-            </View>
+        <View className="mt-6">
+          <Text className="text-xl font-bold text-gray-900 mb-4">
+            Admin Tools
+          </Text>
+          <View className="gap-4">
+            {adminFeatures.map((feature) => {
+              if (
+                feature.title === "Mosque Claims" &&
+                hasRole("admin_approver")
+              ) {
+                return <FeatureCard key={feature.title} feature={feature} />;
+              } else if (
+                feature.title === "Mosque Management" &&
+                hasRole("mosque_admin")
+              ) {
+                return <FeatureCard key={feature.title} feature={feature} />;
+              }
+              return null;
+            })}
           </View>
-        )}
+        </View>
       </View>
     </ScrollView>
   );

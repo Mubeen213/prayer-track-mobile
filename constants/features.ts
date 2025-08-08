@@ -44,12 +44,12 @@ export const adminFeatures: Feature[] = [
     gradient: ["#8B5CF6", "#7C3AED", "#6D28D9"],
     iconGradient: ["#EDE9FE", "#DDD6FE"],
   },
-  // {
-  //   title: "Mosque Management",
-  //   description: "Manage your mosque details and settings",
-  //   icon: "business",
-  //   link: "/mosque-management",
-  //   gradient: ["#d1fae5", "#6ee7b7"], // from-emerald-100 to-emerald-300
-  //   iconGradient: ["#059669", "#047857"], // from-emerald-600 to-emerald-700
-  // },
+  {
+    title: "Mosque Management",
+    description: "Manage your mosque details and settings",
+    icon: "business",
+    link: "/mosque-management",
+    gradient: ["#d1fae5", "#6ee7b7"], // from-emerald-100 to-emerald-300
+    iconGradient: ["#059669", "#047857"], // from-emerald-600 to-emerald-700
+  },
 ];

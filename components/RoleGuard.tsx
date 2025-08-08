@@ -32,7 +32,7 @@ export const MosqueAdmin: React.FC<{
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }> = ({ children, fallback }) => (
-  <RoleGuard roles={["mosque_admin", "super_admin"]} fallback={fallback}>
+  <RoleGuard roles={["mosque_admin"]} fallback={fallback}>
     {children}
   </RoleGuard>
 );
