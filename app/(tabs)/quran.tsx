@@ -34,8 +34,8 @@ export default function Quran() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="max-w-4xl  px-4">
+    <View className="flex-1 bg-gray-50">
+      <View className="max-w-4xl px-4">
         <Text className="text-3xl font-bold mb-8 text-center">
           The Holy Quran
         </Text>
@@ -44,6 +44,6 @@ export default function Quran() {
 
         <ChaptersList chapters={chapters} />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

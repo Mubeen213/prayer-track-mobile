@@ -4,16 +4,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { FeatureCard } from "../../components/common/FeatureCard";
 import { features, adminFeatures } from "../../constants/features";
-import { useAuth, useRoles } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function Home() {
   const { user, hasRole } = useAuth();
-  console.log("Home screen");
 
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 100 }}
+      className="bg-gray-50"
     >
       {/* Header */}
       <View className="pt-8 px-4">

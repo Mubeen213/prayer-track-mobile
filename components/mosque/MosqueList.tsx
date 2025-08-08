@@ -1,73 +1,84 @@
-import React, { useCallback } from "react";
-import {
-  FlatList,
-  RefreshControl,
-  View,
-  Text,
-  ActivityIndicator,
-} from "react-native";
-import { Mosque } from "../../types/mosque";
-import { MosqueCard } from "./MosqueCard";
+import React from "react";
+import { View, Text, FlatList, ActivityIndicator } from "react-native";
 import { useMosques } from "../../hooks/useMosques";
+import { MosqueCard } from "./MosqueCard";
+import { InfiniteData } from "@tanstack/react-query";
+import { MosquesResponse } from "../../types/mosque";
+import { useAuth } from "../../hooks/useAuth";
 import {
   useGetFavoritesStatus,
   useFavoritesMutation,
 } from "../../hooks/useFavorites";
-import { useAuth } from "../../hooks/useAuth";
-import { router } from "expo-router";
 
 interface MosqueListProps {
   searchQuery: string;
+  isNearbyMode?: boolean;
+  nearbyData?: InfiniteData<MosquesResponse>;
+  nearbyLoading?: boolean;
+  nearbyError?: Error | null;
+  onLoadMoreNearby?: () => void;
+  hasMoreNearby?: boolean;
+  isLoadingMoreNearby?: boolean;
 }
 
-export const MosqueList: React.FC<MosqueListProps> = ({ searchQuery }) => {
-  const { userId } = useAuth();
+export const MosqueList: React.FC<MosqueListProps> = ({
+  searchQuery,
+  isNearbyMode = false,
+  nearbyData,
+  nearbyLoading,
+  nearbyError,
+  onLoadMoreNearby,
+  hasMoreNearby,
+  isLoadingMoreNearby,
+}) => {
+  // Get user authentication state
+  const { user } = useAuth();
 
+  // Favorites hooks
+  const { data: favoritesStatus = {} } = useGetFavoritesStatus(
+    user?.id || null
+  ) as { data: Record<string, boolean> };
+  const favoritesMutation = useFavoritesMutation(user?.id || null);
+
+  // Use regular search when not in nearby mode
   const {
-    data,
-    isLoading: isMosquesLoading,
-    isError,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch,
-    isRefetching,
+    data: searchData,
+    isLoading: searchLoading,
+    fetchNextPage: fetchSearchNextPage,
+    hasNextPage: hasSearchNextPage,
+    isFetchingNextPage: isSearchFetchingNext,
   } = useMosques({
     search: searchQuery,
     limit: 6,
+    enabled: !isNearbyMode,
   });
 
-  const mosques = data?.pages.flatMap((page) => page.mosques) || [];
+  // Determine which data to use
+  const data = isNearbyMode ? nearbyData : searchData;
+  const isLoading = isNearbyMode ? nearbyLoading : searchLoading;
+  const error = isNearbyMode ? nearbyError : null;
+  const fetchNextPage = isNearbyMode ? onLoadMoreNearby : fetchSearchNextPage;
+  const hasNextPage = isNearbyMode ? hasMoreNearby : hasSearchNextPage;
+  const isFetchingNextPage = isNearbyMode
+    ? isLoadingMoreNearby
+    : isSearchFetchingNext;
 
-  const { data: favoritesData, isLoading: isFavoritesLoading } =
-    useGetFavoritesStatus(userId) as {
-      data: Record<string, boolean> | undefined;
-      isLoading: boolean;
-    };
+  // Flatten the paginated data
+  const mosques = data?.pages?.flatMap((page) => page.mosques) || [];
 
-  const favoriteMutation = useFavoritesMutation(userId);
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingNextPage && fetchNextPage) {
+      fetchNextPage();
+    }
+  };
 
-  const handleToggleFavorite = useCallback((mosqueId: string) => {
-    if (!userId) {
-      console.log("User not logged in, cannot toggle favorite");
+  const handleToggleFavorite = (mosqueId: string) => {
+    if (!user) {
+      // Handle unauthenticated user - could show login prompt
       return;
     }
-    favoriteMutation.mutate(mosqueId);
-    console.log("Toggle favorite:", mosqueId);
-  }, []);
-
-  const handleMosquePress = useCallback((mosque: Mosque) => {
-    router.push(`/mosque/${mosque.id}?from=mosques`);
-  }, []);
-
-  const renderMosque = ({ item }: { item: Mosque }) => (
-    <MosqueCard
-      mosque={item}
-      onPress={handleMosquePress}
-      isFavorite={favoritesData?.[item.id] || false}
-      onToggleFavorite={handleToggleFavorite}
-    />
-  );
+    favoritesMutation.mutate(mosqueId);
+  };
 
   const renderFooter = () => {
     if (!isFetchingNextPage) return null;
@@ -79,68 +90,66 @@ export const MosqueList: React.FC<MosqueListProps> = ({ searchQuery }) => {
     );
   };
 
-  const handleLoadMore = () => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
+  const renderEmpty = () => {
+    if (isLoading) {
+      return (
+        <View className="flex-1 justify-center items-center py-20">
+          <ActivityIndicator size="large" color="#10B981" />
+          <Text className="text-gray-500 mt-2">
+            {isNearbyMode ? "Finding nearby mosques..." : "Loading mosques..."}
+          </Text>
+        </View>
+      );
     }
+
+    if (error) {
+      return (
+        <View className="flex-1 justify-center items-center py-20">
+          <Text className="text-red-500 text-center">
+            {isNearbyMode
+              ? "Failed to find nearby mosques"
+              : "Failed to load mosques"}
+          </Text>
+          <Text className="text-gray-500 text-center mt-1">
+            Please try again
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <View className="flex-1 justify-center items-center py-20">
+        <Text className="text-gray-500 text-center">
+          {isNearbyMode ? "No mosques found nearby" : "No mosques found"}
+        </Text>
+        <Text className="text-gray-400 text-center text-sm mt-1">
+          {isNearbyMode
+            ? "Try increasing the search radius"
+            : "Try a different search term"}
+        </Text>
+      </View>
+    );
   };
 
-  if (isMosquesLoading || isFavoritesLoading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-gray-50">
-        <ActivityIndicator size="large" color="#10B981" />
-        <Text className="text-gray-600 mt-4">Loading mosques...</Text>
-      </View>
-    );
-  }
-
-  if (isError) {
-    return (
-      <View className="flex-1 justify-center items-center px-8 bg-gray-50">
-        <Text className="text-lg font-semibold text-gray-900 mb-2">
-          Something went wrong
-        </Text>
-        <Text className="text-sm text-gray-600 text-center">
-          Pull down to refresh and try again
-        </Text>
-      </View>
-    );
-  }
-
-  if (mosques.length === 0) {
-    return (
-      <View className="flex-1 justify-center items-center px-8 bg-gray-50">
-        <Text className="text-lg font-semibold text-gray-900 mb-2">
-          No mosques found
-        </Text>
-        <Text className="text-sm text-gray-600 text-center">
-          {searchQuery
-            ? "Try adjusting your search"
-            : "Pull down to refresh and load mosques"}
-        </Text>
-      </View>
-    );
-  }
-
   return (
-    <FlatList
-      data={mosques}
-      renderItem={renderMosque}
-      keyExtractor={(item) => item.id}
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefetching}
-          onRefresh={refetch}
-          colors={["#10B981"]}
-          tintColor="#10B981"
-        />
-      }
-      onEndReached={handleLoadMore}
-      onEndReachedThreshold={0.5}
-      ListFooterComponent={renderFooter}
-      className="bg-gray-50"
-      contentContainerStyle={{ paddingVertical: 8 }}
-      showsVerticalScrollIndicator={false}
-    />
+    <View className="flex-1 px-4">
+      <FlatList
+        data={mosques}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <MosqueCard
+            mosque={item}
+            isFavorite={favoritesStatus[item.id] || false}
+            onToggleFavorite={handleToggleFavorite}
+          />
+        )}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.1}
+        ListFooterComponent={renderFooter}
+        ListEmptyComponent={renderEmpty}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={mosques.length === 0 ? { flex: 1 } : undefined}
+      />
+    </View>
   );
 };

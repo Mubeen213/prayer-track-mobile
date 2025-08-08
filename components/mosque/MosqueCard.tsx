@@ -15,7 +15,7 @@ interface MosqueCardProps {
 export const MosqueCard: React.FC<MosqueCardProps> = ({
   mosque,
   onPress,
-  isFavorite = true,
+  isFavorite = false,
   onToggleFavorite,
 }) => {
   const [showClaimModal, setShowClaimModal] = useState(false);
