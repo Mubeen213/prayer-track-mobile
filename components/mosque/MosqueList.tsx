@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { View, Text, FlatList, ActivityIndicator } from "react-native";
+import { router } from "expo-router";
+import { InfiniteData } from "@tanstack/react-query";
 import { useMosques } from "../../hooks/useMosques";
 import { MosqueCard } from "./MosqueCard";
-import { InfiniteData } from "@tanstack/react-query";
 import { MosquesResponse } from "../../types/mosque";
 import { useAuth } from "../../hooks/useAuth";
+import { Mosque } from "../../types/mosque";
 import {
   useGetFavoritesStatus,
   useFavoritesMutation,
@@ -71,6 +73,10 @@ export const MosqueList: React.FC<MosqueListProps> = ({
       fetchNextPage();
     }
   };
+
+  const handleMosquePress = useCallback((mosque: Mosque) => {
+    router.push(`/mosque/${mosque.id}?from=mosques`);
+  }, []);
 
   const handleToggleFavorite = (mosqueId: string) => {
     if (!user) {
@@ -141,6 +147,7 @@ export const MosqueList: React.FC<MosqueListProps> = ({
             mosque={item}
             isFavorite={favoritesStatus[item.id] || false}
             onToggleFavorite={handleToggleFavorite}
+            onPress={() => handleMosquePress(item)}
           />
         )}
         onEndReached={handleLoadMore}
