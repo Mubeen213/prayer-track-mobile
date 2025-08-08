@@ -57,8 +57,7 @@ export const MosqueList: React.FC<MosqueListProps> = ({ searchQuery }) => {
   }, []);
 
   const handleMosquePress = useCallback((mosque: Mosque) => {
-    router.push(`/mosque/${mosque.id}`);
-    console.log("Navigate to mosque:", mosque.id);
+    router.push(`/mosque/${mosque.id}?from=mosques`);
   }, []);
 
   const renderMosque = ({ item }: { item: Mosque }) => (

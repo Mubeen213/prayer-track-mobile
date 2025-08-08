@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { FlatList, View, Text, ActivityIndicator } from "react-native";
+import { router } from "expo-router";
 import { MosqueCard } from "./MosqueCard";
 import { useGetFavoriteMosques } from "../../hooks/useFavorites";
 import { useFavoritesMutation } from "../../hooks/useFavorites";
@@ -17,9 +18,9 @@ export const FavoriteMosqueList = () => {
     favoriteMutation.mutate(mosqueId);
   };
 
-  const handleMosquePress = (mosque: Mosque) => {
-    console.log("Navigate to mosque:", mosque.id);
-  };
+  const handleMosquePress = useCallback((mosque: Mosque) => {
+    router.push(`/mosque/${mosque.id}?from=favorites`);
+  }, []);
 
   // Transform FavoriteMosque to Mosque format
   const transformToMosque = (favMosque: FavoriteMosque): Mosque => ({

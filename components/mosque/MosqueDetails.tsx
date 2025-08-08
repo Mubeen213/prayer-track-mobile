@@ -22,7 +22,8 @@ export const MosqueDetails = () => {
   const router = useRouter();
   const { userId } = useAuth();
   const [activeTab, setActiveTab] = useState<"timings" | "events">("timings");
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
+
   const { data: mosque, isLoading: isLoadingMosque } = useMosque(id || "");
 
   const { data: favoritesData, isLoading: isFavoritesLoading } =
@@ -45,9 +46,15 @@ export const MosqueDetails = () => {
     [userId, favoriteMutation]
   );
 
-  const handleGoBack = () => {
-    router.push("/mosque");
-  };
+  const handleGoBack = useCallback(() => {
+    if (from === "favorites") {
+      router.push("/(tabs)/favorite");
+    } else if (from === "mosques") {
+      router.push("/(tabs)/mosque");
+    } else {
+      router.push("/(tabs)/mosque");
+    }
+  }, [router, from]);
 
   if (isLoadingMosque) {
     return <MosqueDetailSkeleton />;

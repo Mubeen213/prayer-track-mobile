@@ -8,6 +8,7 @@ import { useAuth, useRoles } from "../../hooks/useAuth";
 
 export default function Home() {
   const { user, hasRole } = useAuth();
+  console.log("Home screen");
 
   return (
     <ScrollView
