@@ -50,9 +50,14 @@ export default function ManageEventsScreen() {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            deleteEventMutation.mutate(event.id, {
-              onSuccess: () => refetch(),
-            });
+            deleteEventMutation.mutate(
+              { eventId: event.id, mosqueId: id || "" },
+              {
+                onSuccess: () => {
+                  refetch();
+                },
+              }
+            );
           },
         },
       ]
