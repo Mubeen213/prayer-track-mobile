@@ -4,6 +4,7 @@ import { Mosque } from "../../types/mosque";
 import { CheckCircle, Landmark, MapPin, Bookmark } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { ClaimMosqueModal } from "./ClaimMosqueModal";
+import { openMaps } from "../../utils/mapLinking";
 
 interface MosqueCardProps {
   mosque: Mosque;
@@ -136,7 +137,10 @@ export const MosqueCard: React.FC<MosqueCardProps> = ({
             />
           </TouchableOpacity>
 
-          <TouchableOpacity className="rounded-lg p-2">
+          <TouchableOpacity
+            className="rounded-lg p-2"
+            onPress={() => openMaps(mosque.latitude, mosque.longitude)}
+          >
             <MapPin size={20} color="#9CA3AF" />
           </TouchableOpacity>
         </View>
