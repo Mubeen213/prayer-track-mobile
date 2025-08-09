@@ -17,14 +17,14 @@ export const features: Feature[] = [
     gradient: ["#dbeafe", "#93c5fd"], // from-blue-100 to-blue-300
     iconGradient: ["#2563eb", "#1d4ed8"], // from-blue-600 to-blue-700
   },
-  {
-    title: "Duas",
-    description: "Learn & Memorize Quranic Duas",
-    icon: "library",
-    link: "/duas",
-    gradient: ["#e9d5ff", "#c4b5fd"], // from-violet-200 to-violet-300
-    iconGradient: ["#7c3aed", "#6d28d9"], // from-violet-600 to-violet-700
-  },
+  // {
+  //   title: "Duas",
+  //   description: "Learn & Memorize Quranic Duas",
+  //   icon: "library",
+  //   link: "/duas",
+  //   gradient: ["#e9d5ff", "#c4b5fd"], // from-violet-200 to-violet-300
+  //   iconGradient: ["#7c3aed", "#6d28d9"], // from-violet-600 to-violet-700
+  // },
   {
     title: "Favorites",
     description: "Your saved mosques",
