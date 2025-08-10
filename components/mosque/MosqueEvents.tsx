@@ -1,34 +1,23 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Alert, Share } from "react-native";
 import { Clock, Share2, User, Calendar } from "lucide-react-native";
 import { useMosqueEvents } from "../../hooks/useEvents";
 import { Event } from "../../types/event";
+import { convert24to12 } from "../../utils/timeConversions";
+import { handleShare } from "../../utils/eventSharing";
 
 interface MosqueEventsProps {
   mosqueId: string;
+  mosqueName: string;
   isVisible: boolean;
 }
 
-const convert24to12 = (time24: string): string => {
-  const [hour, minute] = time24.split(":");
-  const hour12 = parseInt(hour) % 12 || 12;
-  const ampm = parseInt(hour) >= 12 ? "PM" : "AM";
-  return `${hour12}:${minute} ${ampm}`;
-};
-
-export const MosqueEvents = ({ mosqueId, isVisible }: MosqueEventsProps) => {
+export const MosqueEvents = ({
+  mosqueId,
+  mosqueName,
+  isVisible,
+}: MosqueEventsProps) => {
   const { data: events, isLoading } = useMosqueEvents(mosqueId, isVisible);
-
-  const handleShare = async (eventId: string) => {
-    try {
-      Alert.alert("Share Event", `Event ID: ${eventId}`, [
-        { text: "OK", onPress: () => console.log("Event shared") },
-      ]);
-    } catch (err) {
-      console.error(`Error occurred while sharing ${err}`);
-      Alert.alert("Error", "Failed to share event");
-    }
-  };
 
   if (isLoading) {
     return (
@@ -109,7 +98,7 @@ export const MosqueEvents = ({ mosqueId, isVisible }: MosqueEventsProps) => {
 
             {/* Share Button */}
             <TouchableOpacity
-              onPress={() => handleShare(event.id)}
+              onPress={() => handleShare(event, mosqueId, mosqueName)}
               className="p-2 rounded-lg bg-white border border-gray-200 ml-3"
             >
               <Share2 size={20} color="#6B7280" />

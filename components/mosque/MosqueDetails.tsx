@@ -133,6 +133,7 @@ export const MosqueDetails = () => {
             ) : (
               <MosqueEvents
                 mosqueId={id || ""}
+                mosqueName={mosque.name}
                 isVisible={activeTab === "events"}
               />
             )}
