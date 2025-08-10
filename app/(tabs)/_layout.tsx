@@ -1,7 +1,16 @@
+import React from "react";
+import { PlatformPressable } from "@react-navigation/elements";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Platform } from "react-native";
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+  const shouldUseBottomInset =
+    Platform.OS === "ios" || (Platform.OS === "android" && insets.bottom > 0);
+
+  const bottomPadding = shouldUseBottomInset ? insets.bottom : 0;
   return (
     <Tabs
       screenOptions={{
@@ -12,7 +21,8 @@ export default function TabLayout() {
           borderTopWidth: 1,
           borderTopColor: "#e5e7eb", // border-gray-200
           paddingVertical: 12,
-          height: 80,
+          height: 60 + bottomPadding,
+          paddingBottom: bottomPadding,
           position: "absolute",
         },
         tabBarLabelStyle: {
@@ -31,11 +41,18 @@ export default function TabLayout() {
         options={{
           title: "Home",
           headerTitle: "PrayerTrack",
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ focused }) => (
             <Ionicons
               name={focused ? "home" : "home-outline"}
               size={24}
-              color={focused ? "#10b981" : "#6b7280"} // Force the colors
+              color={focused ? "#10b981" : "#6b7280"}
+            />
+          ),
+          tabBarButton: (props) => (
+            <PlatformPressable
+              {...props}
+              pressColor="transparent" //For android
+              pressOpacity={0.3} //For ios
             />
           ),
         }}
@@ -44,11 +61,18 @@ export default function TabLayout() {
         name="mosque"
         options={{
           title: "Mosques",
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ focused }) => (
             <Ionicons
               name={focused ? "location" : "location-outline"}
               size={24}
-              color={focused ? "#10b981" : "#6b7280"} // Force the colors
+              color={focused ? "#10b981" : "#6b7280"}
+            />
+          ),
+          tabBarButton: (props) => (
+            <PlatformPressable
+              {...props}
+              pressColor="transparent" //For android
+              pressOpacity={0.3} //For ios
             />
           ),
         }}
@@ -57,11 +81,18 @@ export default function TabLayout() {
         name="quran"
         options={{
           title: "Quran",
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ focused }) => (
             <Ionicons
               name={focused ? "book" : "book-outline"}
               size={24}
-              color={focused ? "#10b981" : "#6b7280"} // Force the colors
+              color={focused ? "#10b981" : "#6b7280"}
+            />
+          ),
+          tabBarButton: (props) => (
+            <PlatformPressable
+              {...props}
+              pressColor="transparent" //For android
+              pressOpacity={0.3} //For ios
             />
           ),
         }}
@@ -70,11 +101,18 @@ export default function TabLayout() {
         name="favorite"
         options={{
           title: "Favorites",
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ focused }) => (
             <Ionicons
               name={focused ? "bookmark" : "bookmark-outline"}
               size={24}
-              color={focused ? "#10b981" : "#6b7280"} // Force the colors
+              color={focused ? "#10b981" : "#6b7280"}
+            />
+          ),
+          tabBarButton: (props) => (
+            <PlatformPressable
+              {...props}
+              pressColor="transparent" //For android
+              pressOpacity={0.3} //For ios
             />
           ),
         }}
