@@ -62,9 +62,6 @@ export default function Home() {
         </View>
 
         <View className="mt-6">
-          <Text className="text-xl font-bold text-gray-900 mb-4">
-            Admin Tools
-          </Text>
           <View className="gap-4">
             {adminFeatures.map((feature) => {
               if (

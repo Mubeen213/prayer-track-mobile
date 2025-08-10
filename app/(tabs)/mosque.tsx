@@ -20,14 +20,40 @@ export default function MosqueTab() {
     longitude: number;
     radius?: number;
   } | null>(null);
+  const [locationRequested, setLocationRequested] = useState(false);
 
-  const { location, loading: locationLoading, requestLocation } = useLocation();
+  const {
+    location,
+    loading: locationLoading,
+    error,
+    requestLocation,
+  } = useLocation();
 
   React.useEffect(() => {
-    if (isNearbyMode && !location && !locationLoading) {
+    if (
+      isNearbyMode &&
+      !location &&
+      !locationLoading &&
+      !locationRequested &&
+      !error
+    ) {
+      setLocationRequested(true);
       requestLocation();
     }
-  }, [isNearbyMode, location, locationLoading, requestLocation]);
+  }, [
+    isNearbyMode,
+    location,
+    locationLoading,
+    locationRequested,
+    error,
+    requestLocation,
+  ]);
+
+  React.useEffect(() => {
+    if (!isNearbyMode) {
+      setLocationRequested(false);
+    }
+  }, [isNearbyMode]);
 
   const {
     data: nearbyData,
@@ -42,6 +68,7 @@ export default function MosqueTab() {
     setSearchQuery(query);
     setIsNearbyMode(false);
     setNearbyParams(null);
+    setLocationRequested(false);
   }, []);
 
   const handleNearbyPress = useCallback(async () => {
@@ -52,10 +79,12 @@ export default function MosqueTab() {
         setIsNearbyMode(false);
         setNearbyParams(null);
         setSearchQuery("");
+        setLocationRequested(false);
         return;
       }
       setIsNearbyMode(true);
       setSearchQuery("");
+      setLocationRequested(true);
 
       await requestLocation();
 
@@ -63,13 +92,14 @@ export default function MosqueTab() {
         setNearbyParams({
           latitude: location.latitude,
           longitude: location.longitude,
-          radius: 5, // 5km radius
+          radius: 8, // 8km radius
         });
       }
     } catch (error) {
       console.error("Error getting location:", error);
       setIsNearbyMode(false);
       setNearbyParams(null);
+      setLocationRequested(false);
     }
   }, [requestLocation, location, isNearbyMode]);
 
@@ -156,7 +186,7 @@ export default function MosqueTab() {
       {/* Mosque List */}
       <MosqueList
         searchQuery={searchQuery}
-        isNearbyMode={isNearbyMode}
+        isNearbyMode={isNearbyMode && !error}
         nearbyData={nearbyData}
         nearbyLoading={nearbyLoading}
         nearbyError={nearbyError}
