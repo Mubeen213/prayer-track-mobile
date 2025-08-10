@@ -5,6 +5,7 @@ import { CheckCircle, Landmark, MapPin, Bookmark } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { ClaimMosqueModal } from "./ClaimMosqueModal";
 import { openMaps } from "../../utils/mapLinking";
+import { convert24to12 } from "../../utils/timeConversions";
 
 interface MosqueCardProps {
   mosque: Mosque;
@@ -109,7 +110,7 @@ export const MosqueCard: React.FC<MosqueCardProps> = ({
                 </Text>
                 <Text className="text-gray-600 mr-1">at</Text>
                 <Text className="text-green-900 font-bold">
-                  {nextPrayer.jamaat_time}
+                  {convert24to12(nextPrayer.jamaat_time)}
                 </Text>
               </View>
             </View>
