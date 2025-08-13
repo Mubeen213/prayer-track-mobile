@@ -3,6 +3,7 @@ import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
 import { api } from "../config/axios";
 import { User } from "../types/user";
+import NotificationService from "./notificationService";
 
 export const getCurrentUserId = async (): Promise<string | null> => {
   try {
@@ -30,6 +31,8 @@ export async function getOrCreateUserId(): Promise<{
     userId = uuidv4();
     await SecureStore.setItemAsync("userId", userId);
     console.log("No user ID found, created new user ID:", userId);
+    await NotificationService.initialize();
+
     return { userId, isNew: true };
   }
   return { userId, isNew: false };
@@ -37,10 +40,11 @@ export async function getOrCreateUserId(): Promise<{
 
 export const fetchUserData = async (userId: string): Promise<User | null> => {
   try {
-    // Set the header for the request
     api.defaults.headers.common["x-user-id"] = userId;
 
     const response = await api.get("/auth/me");
+    await NotificationService.registerTokenWithServer(userId);
+
     return response.data;
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -68,6 +72,11 @@ export const getStoredUserData = async (): Promise<User | null> => {
 
 export const clearUserData = async (): Promise<void> => {
   try {
+    const userId = await getCurrentUserId();
+    if (userId) {
+      await NotificationService.unregisterToken(userId);
+    }
+
     await SecureStore.deleteItemAsync("userData");
     await SecureStore.deleteItemAsync("userId");
   } catch (error) {

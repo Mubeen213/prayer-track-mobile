@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "prayer_track_mobile",
-    "slug": "prayer_track_mobile",
+    "name": "PrayerTrack Mobile",
+    "slug": "prayertrackmobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,11 +15,14 @@
     "ios": {
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to find nearby mosques for prayer times.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to find nearby mosques for prayer times."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to find nearby mosques for prayer times.",
+        "ITSAppUsesNonExemptEncryption": false
       },
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mubeen21.prayertrackmobile"
     },
     "android": {
+      "package": "com.mubeen21.prayertrackmobile",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION"
@@ -28,7 +31,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -37,8 +41,22 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#ffffff"
+        }
+      ]
     ],
-    "scheme": "prayer-track-mobile"
+    "scheme": "prayer-track-mobile",
+    "owner": "mubeen21",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "262114a5-cdca-41c0-8c84-0f0e051fd358"
+      }
+    }
   }
 }
