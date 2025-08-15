@@ -4,13 +4,11 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   ActivityIndicator,
 } from "react-native";
 import { MapPin } from "lucide-react-native";
 import { MosqueList } from "../../components/mosque/MosqueList";
 import { useLocation } from "../../hooks/useLocation";
-import { useNearbyMosques } from "../../hooks/useNearbyMosques";
 
 export default function MosqueTab() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,15 +53,6 @@ export default function MosqueTab() {
     }
   }, [isNearbyMode]);
 
-  const {
-    data: nearbyData,
-    isLoading: nearbyLoading,
-    error: nearbyError,
-    fetchNextPage: fetchNearbyNextPage,
-    hasNextPage: hasNearbyNextPage,
-    isFetchingNextPage: isNearbyFetchingNext,
-  } = useNearbyMosques(nearbyParams);
-
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
     setIsNearbyMode(false);
@@ -73,9 +62,8 @@ export default function MosqueTab() {
 
   const handleNearbyPress = useCallback(async () => {
     try {
-      console.log("Is nearby mode:", isNearbyMode);
       if (isNearbyMode) {
-        console.log("Exiting nearby mode");
+        // console.log("Exiting nearby mode");
         setIsNearbyMode(false);
         setNearbyParams(null);
         setSearchQuery("");
@@ -92,7 +80,7 @@ export default function MosqueTab() {
         setNearbyParams({
           latitude: location.latitude,
           longitude: location.longitude,
-          radius: 8, // 8km radius
+          radius: 10, // 10km radius
         });
       }
     } catch (error) {
@@ -108,13 +96,12 @@ export default function MosqueTab() {
       setNearbyParams({
         latitude: location.latitude,
         longitude: location.longitude,
-        radius: 5,
+        radius: 10,
       });
     }
   }, [location, isNearbyMode, nearbyParams]);
 
-  const isLoading = locationLoading || nearbyLoading;
-  const totalNearbyMosques = nearbyData?.pages?.[0]?.pagination?.total || 0;
+  const isLoading = locationLoading;
 
   return (
     <View className="flex-1 bg-gray-50 mb-8">
@@ -172,27 +159,12 @@ export default function MosqueTab() {
             </Text>
           </TouchableOpacity>
         </View>
-
-        {/* Results Info */}
-        {isNearbyMode && totalNearbyMosques > 0 && (
-          <View className="mb-2">
-            <Text className="text-sm text-gray-600">
-              Found {totalNearbyMosques} mosques within 8km
-            </Text>
-          </View>
-        )}
       </View>
 
       {/* Mosque List */}
       <MosqueList
         searchQuery={searchQuery}
         isNearbyMode={isNearbyMode && !error}
-        nearbyData={nearbyData}
-        nearbyLoading={nearbyLoading}
-        nearbyError={nearbyError}
-        onLoadMoreNearby={fetchNearbyNextPage}
-        hasMoreNearby={hasNearbyNextPage}
-        isLoadingMoreNearby={isNearbyFetchingNext}
       />
     </View>
   );

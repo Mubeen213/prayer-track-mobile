@@ -2,11 +2,12 @@ import React, { useCallback } from "react";
 import { View, Text, FlatList, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import { InfiniteData } from "@tanstack/react-query";
-import { useMosques } from "../../hooks/useMosques";
+import { useMosques, useNearbyMosques } from "../../hooks/useMosques";
 import { MosqueCard } from "./MosqueCard";
 import { MosquesResponse } from "../../types/mosque";
 import { useAuth } from "../../hooks/useAuth";
 import { Mosque } from "../../types/mosque";
+import { useLocation } from "../../hooks/useLocation";
 import {
   useGetFavoritesStatus,
   useFavoritesMutation,
@@ -15,54 +16,57 @@ import {
 interface MosqueListProps {
   searchQuery: string;
   isNearbyMode?: boolean;
-  nearbyData?: InfiniteData<MosquesResponse>;
-  nearbyLoading?: boolean;
-  nearbyError?: Error | null;
-  onLoadMoreNearby?: () => void;
-  hasMoreNearby?: boolean;
-  isLoadingMoreNearby?: boolean;
 }
 
 export const MosqueList: React.FC<MosqueListProps> = ({
   searchQuery,
   isNearbyMode = false,
-  nearbyData,
-  nearbyLoading,
-  nearbyError,
-  onLoadMoreNearby,
-  hasMoreNearby,
-  isLoadingMoreNearby,
 }) => {
-  // Get user authentication state
   const { user } = useAuth();
-
+  const { location } = useLocation();
   // Favorites hooks
   const { data: favoritesStatus = {} } = useGetFavoritesStatus(
     user?.id || null
   ) as { data: Record<string, boolean> };
   const favoritesMutation = useFavoritesMutation(user?.id || null);
 
-  // Use regular search when not in nearby mode
+  // Regular search/browse mosques from cache
   const {
     data: searchData,
     isLoading: searchLoading,
     fetchNextPage: fetchSearchNextPage,
     hasNextPage: hasSearchNextPage,
     isFetchingNextPage: isSearchFetchingNext,
+    error: searchError,
   } = useMosques({
     search: searchQuery,
-    limit: 6,
+    limit: 20,
     enabled: !isNearbyMode,
   });
+
+  const {
+    data: nearbyData,
+    isLoading: nearbyLoading,
+    fetchNextPage: fetchNearbyNextPage,
+    hasNextPage: hasNearbyNextPage,
+    isFetchingNextPage: isNearbyFetchingNext,
+    error: nearbyError,
+  } = useNearbyMosques(
+    isNearbyMode ? location?.latitude || null : null,
+    isNearbyMode ? location?.longitude || null : null,
+    5 // 5km radius
+  );
 
   // Determine which data to use
   const data = isNearbyMode ? nearbyData : searchData;
   const isLoading = isNearbyMode ? nearbyLoading : searchLoading;
-  const error = isNearbyMode ? nearbyError : null;
-  const fetchNextPage = isNearbyMode ? onLoadMoreNearby : fetchSearchNextPage;
-  const hasNextPage = isNearbyMode ? hasMoreNearby : hasSearchNextPage;
+  const error = isNearbyMode ? nearbyError : searchError;
+  const fetchNextPage = isNearbyMode
+    ? fetchNearbyNextPage
+    : fetchSearchNextPage;
+  const hasNextPage = isNearbyMode ? hasNearbyNextPage : hasSearchNextPage;
   const isFetchingNextPage = isNearbyMode
-    ? isLoadingMoreNearby
+    ? isNearbyFetchingNext
     : isSearchFetchingNext;
 
   // Flatten the paginated data
@@ -80,7 +84,6 @@ export const MosqueList: React.FC<MosqueListProps> = ({
 
   const handleToggleFavorite = (mosqueId: string) => {
     if (!user) {
-      // Handle unauthenticated user - could show login prompt
       return;
     }
     favoritesMutation.mutate(mosqueId);
@@ -109,6 +112,7 @@ export const MosqueList: React.FC<MosqueListProps> = ({
     }
 
     if (error) {
+      console.error("Error loading mosques:", error);
       return (
         <View className="flex-1 justify-center items-center py-20">
           <Text className="text-red-500 text-center">
@@ -128,17 +132,12 @@ export const MosqueList: React.FC<MosqueListProps> = ({
         <Text className="text-gray-500 text-center">
           {isNearbyMode ? "No mosques found nearby" : "No mosques found"}
         </Text>
-        <Text className="text-gray-400 text-center text-sm mt-1">
-          {isNearbyMode
-            ? "Try increasing the search radius"
-            : "Try a different search term"}
-        </Text>
       </View>
     );
   };
 
   return (
-    <View className="flex-1 px-4">
+    <View className="flex-1 mb-20">
       <FlatList
         data={mosques}
         keyExtractor={(item) => item.id}
@@ -151,6 +150,7 @@ export const MosqueList: React.FC<MosqueListProps> = ({
           />
         )}
         onEndReached={handleLoadMore}
+        initialNumToRender={10}
         onEndReachedThreshold={0.1}
         ListFooterComponent={renderFooter}
         ListEmptyComponent={renderEmpty}

@@ -1,9 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Toast from "react-native-toast-message";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../config/axios";
 import { Mosque } from "../types/mosque";
 
-// Get admin's mosques
 export const useAdminMosques = () => {
   return useQuery({
     queryKey: ["admin-mosques"],
@@ -11,6 +9,19 @@ export const useAdminMosques = () => {
       const response = await api.get("/admin/mosques");
       return response.data;
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 2,
+    refetchOnWindowFocus: true,
   });
+};
+
+// Helper hook to force refresh admin mosques
+export const useRefreshAdminMosques = () => {
+  const queryClient = useQueryClient();
+
+  return async () => {
+    await queryClient.refetchQueries({
+      queryKey: ["admin-mosques"],
+      type: "active",
+    });
+  };
 };

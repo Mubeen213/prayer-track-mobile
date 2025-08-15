@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
 import { api } from "../config/axios";
+import { EventService } from "../services/eventService";
 
 interface EventInput {
   title: string;
@@ -32,16 +33,34 @@ export const useMosqueEvents = (mosqueId: string, enabled: boolean) => {
 export const useCreateEvent = () => {
   const queryClient = useQueryClient();
 
-  console.log("useCreateEvent called");
   return useMutation({
     mutationFn: async (data: EventInput) => {
       const response = await api.post("/admin/events", data);
       return response.data;
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
+    onSuccess: async (newEvent, variables) => {
+      // Force sync events from server
+      await EventService.syncEvents(true);
+
+      // Invalidate and refetch all related queries immediately
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["mosque-events", variables.mosque_id],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-mosques"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["events"],
+        }),
+      ]);
+
+      // Force immediate refetch of the specific mosque events
+      await queryClient.refetchQueries({
         queryKey: ["mosque-events", variables.mosque_id],
+        type: "active",
       });
+
       Toast.show({
         type: "success",
         text1: "Event Created Successfully",
@@ -66,14 +85,40 @@ export const useUpdateEvent = () => {
       const response = await api.patch(`/admin/events/${data.id}`, data);
       return response.data;
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
+    onSuccess: async (updatedEvent, variables) => {
+      // Force sync events from server
+      await EventService.syncEvents(true);
+
+      // Invalidate and refetch all related queries
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["mosque-events", variables.mosque_id],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-mosques"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["events"],
+        }),
+      ]);
+
+      // Force immediate refetch
+      await queryClient.refetchQueries({
         queryKey: ["mosque-events", variables.mosque_id],
+        type: "active",
       });
+
       Toast.show({
         type: "success",
         text1: "Event Updated Successfully",
         text2: "Your event has been updated successfully",
+      });
+    },
+    onError: () => {
+      Toast.show({
+        type: "error",
+        text1: "Failed to Update Event",
+        text2: "There was an error updating your event",
       });
     },
   });
@@ -93,10 +138,31 @@ export const useDeleteEvent = () => {
       const response = await api.delete(`/admin/events/${eventId}`);
       return response.data;
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["mosque-events", variables.mosqueId],
+    onSuccess: async (_, variables) => {
+      // Force sync events from server
+      await EventService.syncEvents(true);
+
+      const { mosqueId } = variables;
+
+      // Invalidate and refetch all related queries
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["mosque-events", mosqueId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-mosques"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["events"],
+        }),
+      ]);
+
+      // Force immediate refetch
+      await queryClient.refetchQueries({
+        queryKey: ["mosque-events", mosqueId],
+        type: "active",
       });
+
       Toast.show({
         type: "success",
         text1: "Event Deleted Successfully",

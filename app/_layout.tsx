@@ -5,6 +5,8 @@ import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import * as Device from "expo-device";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
+import { useAppSync } from "../hooks/useAppSync";
 import NotificationService from "../services/notificationService";
 import "../styles/global.css";
 
@@ -12,14 +14,33 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
     },
   },
 });
 
+const AppContent: React.FC = () => {
+  const { userId, isLoading } = useAuth();
+  const { syncError } = useAppSync(userId);
+
+  useEffect(() => {
+    if (syncError) {
+      Toast.show({
+        type: "error",
+        text1: "Sync Error",
+        text2: syncError,
+        visibilityTime: 4000,
+      });
+    }
+  }, [syncError]);
+
+  return <Slot />;
+};
+
 export default function RootLayout() {
   useEffect(() => {
     const initializeNotifications = async () => {
-      // Only initialize on physical devices and non-Expo Go builds
       if (Device.isDevice) {
         try {
           await NotificationService.initialize();
@@ -58,7 +79,7 @@ export default function RootLayout() {
             className="flex-1 pt-16 bg-gray-50"
             edges={["left", "right"]}
           >
-            <Slot />
+            <AppContent />
           </SafeAreaView>
         </AuthProvider>
         <Toast />

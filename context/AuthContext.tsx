@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import { api } from "../config/axios";
 import { REGISTER_USER } from "../utils/urls";
@@ -28,17 +29,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const initAuth = async () => {
     try {
-      setIsLoading(true);
-
       // if (__DEV__) {
       //   console.log("Running in development mode, clearing user ID.");
-      //   await SecureStore.deleteItemAsync("userId");
+      //   await AsyncStorage.clear();
+      //   //  await SecureStore.deleteItemAsync("userId");
       // }
+      setIsLoading(true);
+
       const { userId: currentUserId, isNew } = await getOrCreateUserId();
       setUserId(currentUserId);
 
+      // Set user ID in API headers for all requests
       api.defaults.headers.common["x-user-id"] = currentUserId;
 
+      // Register new user with server
       if (isNew) {
         await api.post(REGISTER_USER, {
           user_id: currentUserId,
@@ -46,21 +50,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         });
       }
 
-      // for offline support
-      let userData = await getStoredUserData();
-
-      if (userData) {
-        setUser(userData);
+      // Load cached user data first for offline support
+      const cachedUserData = await getStoredUserData();
+      if (cachedUserData) {
+        setUser(cachedUserData);
       }
 
+      // Fetch fresh data and update cache
+      // Note: The sync system will handle updating user data
+      // This just ensures we have basic user data available
       const freshUserData = await fetchUserData(currentUserId);
       if (freshUserData) {
         setUser(freshUserData);
         await storeUserData(freshUserData);
       }
+
       console.log("User initialized:", freshUserData);
     } catch (error) {
-      console.error("Auth Init Error:", error);
+      console.error("Auth initialization error:", error);
     } finally {
       setIsLoading(false);
     }

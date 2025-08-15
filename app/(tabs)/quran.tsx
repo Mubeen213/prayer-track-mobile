@@ -35,8 +35,8 @@ export default function Quran() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      <View className="max-w-4xl px-4">
-        <Text className="text-3xl font-bold mb-8 text-center">
+      <View className="max-w-4xl">
+        <Text className="text-3xl font-bold mb-8 text-center px-4">
           The Holy Quran
         </Text>
 

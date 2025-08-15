@@ -38,7 +38,7 @@ class NotificationService {
     try {
       // Check if device supports push notifications
       if (!Device.isDevice) {
-        console.warn("Push notifications only work on physical devices");
+        // console.warn("Push notifications only work on physical devices");
         return null;
       }
 
@@ -112,7 +112,7 @@ class NotificationService {
       const token = (await this.getStoredToken()) || (await this.initialize());
 
       if (!token) {
-        console.warn("No push token available to register");
+        // console.warn("No push token available to register");
         return false;
       }
 
