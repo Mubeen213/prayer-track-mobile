@@ -93,10 +93,10 @@ export const MosqueDetails = () => {
 
   return (
     <ScrollView className="flex-1">
-      <View className="p-4">
-        <View className="bg-white rounded-lg shadow-sm border border-gray-100">
+      <View className="">
+        <View className="bg-white rounded-lg shadow-sm ">
           {/* Header */}
-          <View className="p-4 border-gray-100">
+          <View className="p-4">
             <View className="flex-row items-center relative mb-2">
               <TouchableOpacity
                 onPress={handleGoBack}
@@ -127,7 +127,7 @@ export const MosqueDetails = () => {
                 <Text className="text-sm text-gray-500">{mosque.landmark}</Text>
               )}
               <Text className="text-sm text-gray-500">
-                {mosque.city}, {mosque.state}
+                {mosque.city} {mosque.state}
               </Text>
             </View>
           </View>

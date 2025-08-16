@@ -39,26 +39,38 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
 
     onSearch(query);
   };
-
   return (
-    <View className="mb-8">
-      <View className="flex-row gap-2">
-        <TextInput
-          className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Eg: 18 or 2:89"
-          placeholderTextColor="#9CA3AF"
-          onSubmitEditing={handleSearch}
-        />
-        <TouchableOpacity
-          onPress={handleSearch}
-          className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex-row items-center gap-2"
-          activeOpacity={0.8}
-        >
-          <Search size={16} color="#ffffff" />
-          <Text className="text-white">Search</Text>
-        </TouchableOpacity>
+    <View className="flex-1 justify-center items-center p-4 mb-6">
+      <View className="mb-6 w-full max-w-md">
+        <View className="flex-row">
+          <TextInput
+            className="flex-1 rounded-lg border border-gray-300 mr-2 text-gray-900"
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              minHeight: 44,
+              fontSize: 16,
+            }}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Eg: 18 or 2:89"
+            placeholderTextColor="#9CA3AF"
+            onSubmitEditing={handleSearch}
+          />
+          <TouchableOpacity
+            onPress={handleSearch}
+            className="bg-green-500 rounded-lg flex-row items-center"
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              minHeight: 44,
+            }}
+            activeOpacity={0.8}
+          >
+            <Search size={16} color="#ffffff" />
+            <Text className="text-white ml-2">Search</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
