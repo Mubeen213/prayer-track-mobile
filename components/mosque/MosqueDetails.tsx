@@ -1,10 +1,5 @@
-import React, { useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
+import React, { useState, useCallback, useEffect } from "react";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { MosqueDetailSkeleton } from "../skeleton/MosqueDetailSkeleton";
 import { useMosque } from "../../hooks/useMosques";
@@ -22,6 +17,9 @@ export const MosqueDetails = () => {
   const { userId } = useAuth();
   const [activeTab, setActiveTab] = useState<"timings" | "events">("timings");
   const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
+  const [optimisticFavorite, setOptimisticFavorite] = useState<boolean | null>(
+    null
+  );
 
   const { data: mosque, isLoading: isLoadingMosque } = useMosque(id || "");
 
@@ -32,7 +30,29 @@ export const MosqueDetails = () => {
     };
   const favoriteMutation = useFavoritesMutation(userId);
 
-  let isFavorite = favoritesData ? !!favoritesData[id || ""] : false;
+  const serverFavoriteStatus = favoritesData
+    ? !!favoritesData[id || ""]
+    : false;
+  const isFavorite =
+    optimisticFavorite !== null ? optimisticFavorite : serverFavoriteStatus;
+
+  useEffect(() => {
+    if (favoritesData && optimisticFavorite !== null) {
+      const serverStatus = !!favoritesData[id || ""];
+      if (serverStatus === optimisticFavorite) {
+        setOptimisticFavorite(null);
+      }
+    }
+  }, [favoritesData, optimisticFavorite, id]);
+
+  useEffect(() => {
+    if (!favoriteMutation.isPending && optimisticFavorite !== null) {
+      const timer = setTimeout(() => {
+        setOptimisticFavorite(null);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [favoriteMutation.isPending, optimisticFavorite]);
 
   const handleToggleFavorite = useCallback(
     (mosqueId: string) => {
@@ -40,9 +60,19 @@ export const MosqueDetails = () => {
         console.log("User not logged in, cannot toggle favorite");
         return;
       }
-      favoriteMutation.mutate(mosqueId);
+
+      const currentStatus =
+        optimisticFavorite !== null ? optimisticFavorite : serverFavoriteStatus;
+      setOptimisticFavorite(!currentStatus);
+
+      favoriteMutation.mutate(mosqueId, {
+        onError: () => {
+          // Revert optimistic update on error
+          setOptimisticFavorite(currentStatus);
+        },
+      });
     },
-    [userId, favoriteMutation]
+    [userId, favoriteMutation, optimisticFavorite, serverFavoriteStatus]
   );
 
   const handleGoBack = useCallback(() => {
@@ -62,11 +92,11 @@ export const MosqueDetails = () => {
   if (!mosque) return null;
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView className="flex-1">
       <View className="p-4">
         <View className="bg-white rounded-lg shadow-sm border border-gray-100">
           {/* Header */}
-          <View className="p-4 border-b border-gray-100">
+          <View className="p-4 border-gray-100">
             <View className="flex-row items-center relative mb-2">
               <TouchableOpacity
                 onPress={handleGoBack}
@@ -114,7 +144,7 @@ export const MosqueDetails = () => {
                   }`}
                 >
                   <Text
-                    className={`font-medium text-center ${
+                    className={`font-medium text-center p-1 ${
                       activeTab === tab ? "text-white" : "text-gray-600"
                     }`}
                   >

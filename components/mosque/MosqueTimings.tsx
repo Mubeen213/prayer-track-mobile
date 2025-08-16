@@ -78,7 +78,7 @@ export const MosqueTimings = ({ mosque }: MosqueTimingsProps) => {
               key={prayer.prayer_name}
               className={`rounded-lg p-4 mb-4 ${config.theme}`}
             >
-              <View className="flex-row items-center justify-between mb-3">
+              <View className="flex-row items-center justify-between mb-3 p-4">
                 <View className="flex-row items-center gap-2">
                   {config.icon}
                   <Text className="font-semibold text-gray-800 capitalize">
@@ -96,7 +96,7 @@ export const MosqueTimings = ({ mosque }: MosqueTimingsProps) => {
             key={prayer.prayer_name}
             className={`rounded-lg p-4 mb-4 ${config.theme}`}
           >
-            <View className="flex-row items-center justify-between mb-3">
+            <View className="flex-row items-center justify-between mb-3 p-2">
               <View className="flex-row items-center gap-2">
                 {config.icon}
                 <Text className="font-semibold text-gray-800 capitalize">
