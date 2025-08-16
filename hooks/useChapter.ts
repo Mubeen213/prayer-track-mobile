@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Chapter } from "../types/quran";
+import { Chapter, QuranService } from "../services/quranService";
 
 interface UseChapterProps {
   chapterNumber: string | undefined;
@@ -14,7 +14,6 @@ interface UseChapterReturn {
 export const useChapter = ({
   chapterNumber,
 }: UseChapterProps): UseChapterReturn => {
-  const cloudfrontUrl = process.env.EXPO_PUBLIC_QURAN_CLOUDFRONT_URL;
   const {
     data: chapter,
     isLoading,
@@ -22,15 +21,14 @@ export const useChapter = ({
   } = useQuery({
     queryKey: ["chapter", chapterNumber],
     queryFn: async () => {
-      const url = `${cloudfrontUrl}/Quran/chapter-${chapterNumber}.json`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error("Failed to fetch chapter");
+      if (!chapterNumber) {
+        throw new Error("Chapter number is required");
       }
-      return response.json() as Promise<Chapter>;
+      return await QuranService.getChapter(chapterNumber);
     },
     enabled: !!chapterNumber,
-    staleTime: 10 * 60 * 1000,
+    staleTime: 60, // 1 hour
+    retry: 2,
   });
 
   return {

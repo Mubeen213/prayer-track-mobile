@@ -5,7 +5,7 @@ import { useChapter } from "../../hooks/useChapter";
 import { ChapterHeader } from "../../components/quran/ChapterHeader";
 import { VerseCard } from "../../components/quran/VerseCard";
 import { ChapterTitle } from "../../components/quran/ChapterTitle";
-import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
+import { ChapterSkeleton } from "../../components/ui/ChapterSkeleton";
 
 export default function ChapterPage() {
   const { number, verse } = useLocalSearchParams<{
@@ -74,11 +74,11 @@ export default function ChapterPage() {
   }, [error, isLoading]);
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <ChapterSkeleton />;
   }
 
   if (error || !chapter) {
-    return <LoadingSpinner />;
+    return <ChapterSkeleton />;
   }
 
   const getFontSize = (size: string) => {
