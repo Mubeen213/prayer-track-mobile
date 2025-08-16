@@ -44,3 +44,7 @@ google-services.json
 .idea
 
 build-*
+# Expo
+.expo
+dist/
+web-build/
