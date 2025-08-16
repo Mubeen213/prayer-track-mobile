@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { Mosque } from "../../types/mosque";
-import { CheckCircle, Landmark, MapPin, Bookmark } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { CheckCircle, MapPin, Bookmark, Clock } from "lucide-react-native";
+
+import { Mosque } from "../../types/mosque";
 import { ClaimMosqueModal } from "./ClaimMosqueModal";
 import { openMaps } from "../../utils/mapLinking";
 import { convert24to12 } from "../../utils/timeConversions";
@@ -40,13 +41,13 @@ export const MosqueCard: React.FC<MosqueCardProps> = ({
   return (
     <>
       <TouchableOpacity
-        className="bg-white rounded-2xl p-6 mx-4 my-2 shadow-sm border border-gray-100"
+        className="bg-white rounded-2xl p-4 mx-4 my-2 shadow-sm border border-gray-100"
         onPress={() => onPress?.(mosque)}
         activeOpacity={0.7}
       >
-        {/* Verified Badge */}
+        {/* Status Badge - Fixed curves to match card radius */}
         {mosque.status === "active" && (
-          <View className="absolute right-0 top-0 z-10 flex-row items-center bg-green-500 rounded-bl-lg px-3 py-1.5">
+          <View className="absolute right-0 top-0 z-10 flex-row items-center bg-green-500 rounded-bl-2xl rounded-tr-2xl px-3 py-2">
             <CheckCircle size={14} color="white" />
             <Text className="text-white text-xs font-medium ml-1">
               Verified
@@ -57,39 +58,25 @@ export const MosqueCard: React.FC<MosqueCardProps> = ({
         {mosque.status === "unverified" && (
           <TouchableOpacity
             onPress={() => setShowClaimModal(true)}
-            className="absolute right-0 top-0 z-10 flex-row items-center bg-orange-500 rounded-bl-lg px-3 py-1.5"
+            className="absolute right-0 top-0 z-10 flex-row items-center bg-orange-500 rounded-bl-2xl rounded-tr-2xl px-3 py-2"
             activeOpacity={0.8}
           >
-            {/* <CheckCircle size={14} color="white" /> */}
-            <Text className="text-white text-xs font-medium ml-1">
-              Claim Now
-            </Text>
+            <Text className="text-white text-xs font-medium">Claim Now</Text>
           </TouchableOpacity>
         )}
 
-        {/* Header */}
-        <View className="flex-row items-start mb-4 mr-16">
-          <View className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-3 mr-4">
-            <LinearGradient
-              colors={["#22c55e", "#059669"]}
-              start={[0, 0]}
-              end={[1, 1]}
-              className="rounded-full p-2"
-            >
-              <Landmark size={20} color="white" />
-            </LinearGradient>
-          </View>
-
+        {/* Header - Removed problematic icon, kept clean design */}
+        <View className="flex-row items-start mb-4 pr-20">
           <View className="flex-1">
             <Text
-              className="text-lg font-semibold text-gray-900 mb-1"
+              className="text-lg font-semibold text-gray-900 mb-2"
               numberOfLines={2}
             >
               {mosque.name}
             </Text>
 
             <View className="flex-row items-start">
-              <MapPin size={16} color="#10B981" className="mt-0.5 mr-1.5" />
+              <MapPin size={16} color="#10B981" className="mt-0.5 mr-2" />
               <Text className="text-sm text-gray-600 flex-1" numberOfLines={2}>
                 {mosque.address}
               </Text>
@@ -97,38 +84,66 @@ export const MosqueCard: React.FC<MosqueCardProps> = ({
           </View>
         </View>
 
-        {/* Next Prayer Highlight */}
+        {/* Next Prayer Section */}
         {nextPrayer && (
-          <View className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 mb-6">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center">
-                <Text className="text-gray-600 font-bold mr-2">
-                  Next Prayer
-                </Text>
-                <Text className="text-green-700 font-medium capitalize mr-1">
-                  {nextPrayer.prayer_name}
-                </Text>
-                <Text className="text-gray-600 mr-1">at</Text>
-                <Text className="text-green-900 font-bold">
-                  {convert24to12(nextPrayer.jamaat_time)}
-                </Text>
-              </View>
+          <LinearGradient
+            colors={["#f0fdf4", "#ecfdf5"]} // Example hex codes for the from-green-50 to-emerald-50 gradient
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{
+              padding: 16, // Equivalent to p-4
+              borderRadius: 12, // Equivalent to rounded-xl
+              marginBottom: 16,
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text
+                style={{ fontWeight: "600", fontSize: 16, color: "#4b5563" }}
+              >
+                Next Prayer
+              </Text>
+              <Text
+                style={{
+                  fontWeight: "500",
+                  fontSize: 16,
+                  textTransform: "capitalize",
+                  color: "#047857",
+                  marginLeft: 8,
+                }}
+              >
+                {nextPrayer.prayer_name}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: "#4b5563",
+                  marginLeft: 4,
+                  marginRight: 4,
+                }}
+              >
+                at
+              </Text>
+              <Text
+                style={{ fontWeight: "bold", fontSize: 16, color: "#064e3b" }}
+              >
+                {convert24to12(nextPrayer.jamaat_time)}
+              </Text>
             </View>
-          </View>
+          </LinearGradient>
         )}
 
-        {/* Action Buttons */}
-        <View className="flex-row items-center gap-2">
-          <View className="flex-1 rounded-lg overflow-hidden">
+        {/* Action Buttons - Fixed spacing and consistency */}
+        <View className="flex-row items-center">
+          <View className="flex-1 rounded-lg overflow-hidden mr-3">
             <LinearGradient colors={["#22c55e", "#059669"]}>
-              <Text className="text-white text-center py-2 font-medium">
+              <Text className="text-white text-center py-3 font-medium">
                 View Details
               </Text>
             </LinearGradient>
           </View>
 
           <TouchableOpacity
-            className="rounded-lg p-2 mr-2"
+            className="rounded-lg p-3  mr-3"
             onPress={() => onToggleFavorite?.(mosque.id)}
           >
             <Bookmark
@@ -139,7 +154,7 @@ export const MosqueCard: React.FC<MosqueCardProps> = ({
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="rounded-lg p-2"
+            className="rounded-lg p-3"
             onPress={() => openMaps(mosque.latitude, mosque.longitude)}
           >
             <MapPin size={20} color="#9CA3AF" />
