@@ -54,18 +54,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const cachedUserData = await getStoredUserData();
       if (cachedUserData) {
         setUser(cachedUserData);
+      } else {
+        const freshUserData = await fetchUserData(currentUserId);
+        if (freshUserData) {
+          setUser(freshUserData);
+          await storeUserData(freshUserData);
+        }
       }
-
-      // Fetch fresh data and update cache
-      // Note: The sync system will handle updating user data
-      // This just ensures we have basic user data available
-      const freshUserData = await fetchUserData(currentUserId);
-      if (freshUserData) {
-        setUser(freshUserData);
-        await storeUserData(freshUserData);
-      }
-
-      console.log("User initialized:", freshUserData);
     } catch (error) {
       console.error("Auth initialization error:", error);
     } finally {
