@@ -27,14 +27,7 @@ export const handleShare = async (
       event.scholar ? `👨‍🏫 Speaker: ${event.scholar}` : "",
       event.description ? `\n📝 ${event.description}` : "",
       "",
-      "Join us for this special event! 🤲",
-      "",
-      "📱 View in Prayer Track App:",
-      appDeepLink,
-      "",
-      "Download the app:",
-      `🍎 iOS: ${process.env.EXPO_PUBLIC_IOS_APP_STORE_URL}`,
-      `🤖 Android: ${process.env.EXPO_PUBLIC_ANDROID_PLAY_STORE_URL}`,
+      "Join us for this special event! 🤲"
     ]
       .filter(Boolean)
       .join("\n");
