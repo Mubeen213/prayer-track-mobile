@@ -11,6 +11,7 @@ import {
   getStoredUserData,
   clearUserData,
 } from "../services/userService";
+import NotificationService from "../services/notificationService";
 import { User } from "../types/user";
 import { AuthContextType } from "../types/auth";
 
@@ -32,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // if (__DEV__) {
       //   console.log("Running in development mode, clearing user ID.");
       //   await AsyncStorage.clear();
-      //   //  await SecureStore.deleteItemAsync("userId");
+      //   await SecureStore.deleteItemAsync("userId");
       // }
       setIsLoading(true);
 
@@ -42,15 +43,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Set user ID in API headers for all requests
       api.defaults.headers.common["x-user-id"] = currentUserId;
 
-      // Register new user with server
+      // Register new user with server with notification token
       if (isNew) {
         await api.post(REGISTER_USER, {
           user_id: currentUserId,
           platform: Platform.OS,
         });
+        await NotificationService.registerTokenWithServer(currentUserId);
       }
 
-      // Load cached user data first for offline support
       const cachedUserData = await getStoredUserData();
       if (cachedUserData) {
         setUser(cachedUserData);

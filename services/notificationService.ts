@@ -80,7 +80,7 @@ class NotificationService {
       // Store token locally
       await AsyncStorage.setItem("expoPushToken", this.expoPushToken);
 
-      console.log("Expo push token:", this.expoPushToken);
+      // console.log("Expo push token:", this.expoPushToken);
       return this.expoPushToken;
     } catch (error) {
       console.error("Error getting push notification token:", error);

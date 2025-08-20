@@ -60,7 +60,7 @@ export default function Home() {
     <ScrollView
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 100 }}
-      className="bg-gray-50"
+      className="bg-gray-50 mb-10"
     >
       {/* Header */}
       <View className="pt-8 px-4">
