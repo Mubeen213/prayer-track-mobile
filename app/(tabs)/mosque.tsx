@@ -12,13 +12,7 @@ import { useLocation } from "../../hooks/useLocation";
 
 export default function MosqueTab() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [isNearbyMode, setIsNearbyMode] = useState(true);
-  const [nearbyParams, setNearbyParams] = useState<{
-    latitude: number;
-    longitude: number;
-    radius?: number;
-  } | null>(null);
-  const [locationRequested, setLocationRequested] = useState(false);
+  const [isNearbyMode, setIsNearbyMode] = useState(false);
 
   const {
     location,
@@ -27,90 +21,37 @@ export default function MosqueTab() {
     requestLocation,
   } = useLocation();
 
-  React.useEffect(() => {
-    if (
-      isNearbyMode &&
-      !location &&
-      !locationLoading &&
-      !locationRequested &&
-      !error
-    ) {
-      setLocationRequested(true);
-      requestLocation();
-    }
-  }, [
-    isNearbyMode,
-    location,
-    locationLoading,
-    locationRequested,
-    error,
-    requestLocation,
-  ]);
-
-  React.useEffect(() => {
-    if (!isNearbyMode) {
-      setLocationRequested(false);
-    }
-  }, [isNearbyMode]);
-
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
-    setIsNearbyMode(false);
-    setNearbyParams(null);
-    setLocationRequested(false);
+    if (query.trim()) {
+      setIsNearbyMode(false);
+    }
   }, []);
 
   const handleNearbyPress = useCallback(async () => {
-    try {
-      if (isNearbyMode) {
-        // console.log("Exiting nearby mode");
-        setIsNearbyMode(false);
-        setNearbyParams(null);
-        setSearchQuery("");
-        setLocationRequested(false);
-        return;
-      }
-      setIsNearbyMode(true);
-      setSearchQuery("");
-      setLocationRequested(true);
-
-      await requestLocation();
-
-      if (location) {
-        setNearbyParams({
-          latitude: location.latitude,
-          longitude: location.longitude,
-          radius: 10, // 10km radius
-        });
-      }
-    } catch (error) {
-      console.error("Error getting location:", error);
+    if (isNearbyMode) {
+      // Exit nearby mode
       setIsNearbyMode(false);
-      setNearbyParams(null);
-      setLocationRequested(false);
+      setSearchQuery("");
+      return;
     }
-  }, [requestLocation, location, isNearbyMode]);
 
-  React.useEffect(() => {
-    if (isNearbyMode && location && !nearbyParams) {
-      setNearbyParams({
-        latitude: location.latitude,
-        longitude: location.longitude,
-        radius: 10,
-      });
+    // Enter nearby mode
+    setSearchQuery("");
+    setIsNearbyMode(true);
+
+    // Request location if we don't have it
+    if (!location && !locationLoading) {
+      await requestLocation();
     }
-  }, [location, isNearbyMode, nearbyParams]);
+  }, [isNearbyMode, location, locationLoading, requestLocation]);
 
-  const isLoading = locationLoading;
+  const isLoading = locationLoading && isNearbyMode;
 
   return (
     <View className="flex-1 bg-gray-50 mb-8">
       {/* Header */}
       <View className="px-4 py-2">
-        {/* <Text className="text-2xl font-bold bg-white text-gray-900 mb-4">
-          Mosques
-        </Text> */}
-
         {/* Search Container */}
         <View className="bg-white rounded-xl shadow-sm border border-gray-200 p-2 mb-4">
           {/* Search Input */}
@@ -162,10 +103,7 @@ export default function MosqueTab() {
       </View>
 
       {/* Mosque List */}
-      <MosqueList
-        searchQuery={searchQuery}
-        isNearbyMode={isNearbyMode && !error}
-      />
+      <MosqueList searchQuery={searchQuery} isNearbyMode={isNearbyMode} />
     </View>
   );
 }

@@ -23,7 +23,14 @@ export const MosqueList: React.FC<MosqueListProps> = ({
   isNearbyMode = false,
 }) => {
   const { user } = useAuth();
-  const { location } = useLocation();
+  const { location, requestLocation } = useLocation();
+
+  React.useEffect(() => {
+    if (isNearbyMode && !location) {
+      requestLocation();
+    }
+  }, [isNearbyMode, location, requestLocation]);
+
   // Favorites hooks
   const { data: favoritesStatus = {} } = useGetFavoritesStatus(
     user?.id || null
@@ -54,7 +61,7 @@ export const MosqueList: React.FC<MosqueListProps> = ({
   } = useNearbyMosques(
     isNearbyMode ? location?.latitude || null : null,
     isNearbyMode ? location?.longitude || null : null,
-    5 // 5km radius
+    8 // 8km radius
   );
 
   // Determine which data to use

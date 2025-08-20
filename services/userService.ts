@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import "react-native-get-random-values";
 import * as SecureStore from "expo-secure-store";
 import { v4 as uuidv4 } from "uuid";
 import { api } from "../config/axios";
