@@ -94,7 +94,7 @@ export const MosqueDetails = () => {
   return (
     <ScrollView className="flex-1">
       <View className="">
-        <View className="bg-white rounded-lg shadow-sm ">
+        <View className="bg-white rounded-lg shadow-sm mb-20">
           {/* Header */}
           <View className="p-4">
             <View className="flex-row items-center relative mb-2">

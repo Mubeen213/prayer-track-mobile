@@ -152,7 +152,7 @@ export default function ChapterPage() {
         renderItem={renderVerse}
         keyExtractor={(item) => item.ayah_number.toString()}
         ListHeaderComponent={<ChapterTitle chapter={chapter} />}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 55 }}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={false}
         maxToRenderPerBatch={20}

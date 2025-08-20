@@ -22,7 +22,7 @@ export const MosqueList: React.FC<MosqueListProps> = ({
   searchQuery,
   isNearbyMode = false,
 }) => {
-  const { user } = useAuth();
+  const { user, userId } = useAuth();
   const { location, requestLocation } = useLocation();
 
   React.useEffect(() => {
@@ -33,9 +33,9 @@ export const MosqueList: React.FC<MosqueListProps> = ({
 
   // Favorites hooks
   const { data: favoritesStatus = {} } = useGetFavoritesStatus(
-    user?.id || null
+    userId || null
   ) as { data: Record<string, boolean> };
-  const favoritesMutation = useFavoritesMutation(user?.id || null);
+  const favoritesMutation = useFavoritesMutation(userId || null);
 
   // Regular search/browse mosques from cache
   const {
@@ -90,7 +90,7 @@ export const MosqueList: React.FC<MosqueListProps> = ({
   }, []);
 
   const handleToggleFavorite = (mosqueId: string) => {
-    if (!user) {
+    if (!userId) {
       return;
     }
     favoritesMutation.mutate(mosqueId);
