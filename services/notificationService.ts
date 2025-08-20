@@ -69,8 +69,6 @@ class NotificationService {
         return null;
       }
 
-      console.log("Using project ID:", projectId);
-
       const tokenData = await Notifications.getExpoPushTokenAsync({
         projectId,
       });

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,18 +13,35 @@ import { useLocation } from "../../hooks/useLocation";
 export default function MosqueTab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isNearbyMode, setIsNearbyMode] = useState(false);
+  const [isRequestingLocation, setIsRequestingLocation] = useState(false);
 
   const {
     location,
     loading: locationLoading,
-    error,
+    error: locationError,
     requestLocation,
   } = useLocation();
+
+  // Effect to handle when location is obtained in nearby mode
+  useEffect(() => {
+    if (isNearbyMode && location && !locationLoading) {
+      setIsRequestingLocation(false);
+    }
+  }, [isNearbyMode, location, locationLoading]);
+
+  // Effect to handle location errors
+  useEffect(() => {
+    if (locationError && isRequestingLocation) {
+      setIsRequestingLocation(false);
+      setIsNearbyMode(false);
+    }
+  }, [locationError, isRequestingLocation]);
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
     if (query.trim()) {
       setIsNearbyMode(false);
+      setIsRequestingLocation(false);
     }
   }, []);
 
@@ -32,25 +49,32 @@ export default function MosqueTab() {
     if (isNearbyMode) {
       // Exit nearby mode
       setIsNearbyMode(false);
+      setIsRequestingLocation(false);
       setSearchQuery("");
       return;
     }
 
     // Enter nearby mode
     setSearchQuery("");
-    setIsNearbyMode(true);
+    setIsRequestingLocation(true);
 
     if (!location && !locationLoading) {
-      try {
-        await requestLocation();
-      } catch (error) {
-        console.error("Failed to get location:", error);
-        setIsNearbyMode(false);
+      const result = await requestLocation();
+      if (result) {
+        // Successfully got location
+        setIsNearbyMode(true);
       }
+      // Always reset requesting state
+      setIsRequestingLocation(false);
+    } else if (location) {
+      // Location is already available
+      setIsNearbyMode(true);
+      setIsRequestingLocation(false);
     }
   }, [isNearbyMode, location, locationLoading, requestLocation]);
 
-  const isLoading = locationLoading && isNearbyMode;
+  const isLoading =
+    isRequestingLocation || (locationLoading && isRequestingLocation);
 
   return (
     <View className="flex-1 bg-gray-50 mb-8">
@@ -107,7 +131,11 @@ export default function MosqueTab() {
       </View>
 
       {/* Mosque List */}
-      <MosqueList searchQuery={searchQuery} isNearbyMode={isNearbyMode} />
+      <MosqueList
+        searchQuery={searchQuery}
+        isNearbyMode={isNearbyMode && !!location}
+        location={location}
+      />
     </View>
   );
 }

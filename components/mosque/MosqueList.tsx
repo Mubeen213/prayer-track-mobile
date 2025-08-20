@@ -7,7 +7,6 @@ import { MosqueCard } from "./MosqueCard";
 import { MosquesResponse } from "../../types/mosque";
 import { useAuth } from "../../hooks/useAuth";
 import { Mosque } from "../../types/mosque";
-import { useLocation } from "../../hooks/useLocation";
 import {
   useGetFavoritesStatus,
   useFavoritesMutation,
@@ -16,14 +15,15 @@ import {
 interface MosqueListProps {
   searchQuery: string;
   isNearbyMode?: boolean;
+  location?: { latitude: number; longitude: number } | null;
 }
 
 export const MosqueList: React.FC<MosqueListProps> = ({
   searchQuery,
   isNearbyMode = false,
+  location,
 }) => {
   const { user, userId } = useAuth();
-  const { location, requestLocation } = useLocation();
 
   // Favorites hooks
   const { data: favoritesStatus = {} } = useGetFavoritesStatus(
@@ -57,6 +57,7 @@ export const MosqueList: React.FC<MosqueListProps> = ({
     isNearbyMode ? location?.longitude || null : null,
     8 // 8km radius
   );
+  // console.log(`Is nearby mode: ${isNearbyMode}`);
 
   // Determine which data to use
   const data = isNearbyMode ? nearbyData : searchData;
