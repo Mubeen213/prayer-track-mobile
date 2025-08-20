@@ -122,7 +122,7 @@ export default function ManageEventsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50 mb-20">
       {/* Header */}
       <View className="px-4 py-6 bg-white border-b border-gray-200">
         <View className="flex-row items-center justify-between">

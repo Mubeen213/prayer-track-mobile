@@ -25,12 +25,6 @@ export const MosqueList: React.FC<MosqueListProps> = ({
   const { user, userId } = useAuth();
   const { location, requestLocation } = useLocation();
 
-  React.useEffect(() => {
-    if (isNearbyMode && !location) {
-      requestLocation();
-    }
-  }, [isNearbyMode, location, requestLocation]);
-
   // Favorites hooks
   const { data: favoritesStatus = {} } = useGetFavoritesStatus(
     userId || null

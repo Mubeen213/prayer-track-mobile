@@ -40,9 +40,13 @@ export default function MosqueTab() {
     setSearchQuery("");
     setIsNearbyMode(true);
 
-    // Request location if we don't have it
     if (!location && !locationLoading) {
-      await requestLocation();
+      try {
+        await requestLocation();
+      } catch (error) {
+        console.error("Failed to get location:", error);
+        setIsNearbyMode(false);
+      }
     }
   }, [isNearbyMode, location, locationLoading, requestLocation]);
 
