@@ -16,7 +16,7 @@ export const ChapterTitle: React.FC<ChapterTitleProps> = ({ chapter }) => {
     <View className="px-4 py-8 bg-[#fafaf7]">
       <View className="items-center">
         <Text
-          className="text-3xl mb-2 text-center text-gray-900"
+          className="text-3xl mb-2 text-center text-gray-900 p-3"
           style={{
             fontFamily: fontLoaded ? "ScheherazadeNew_400Regular" : undefined,
           }}

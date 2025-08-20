@@ -33,7 +33,7 @@ export const ChaptersList: React.FC<ChaptersListProps> = ({ chapters }) => {
       )}
       contentContainerStyle={{
         padding: 16,
-        paddingBottom: insets.bottom + tabBarHeight + 100,
+        paddingBottom: insets.bottom + tabBarHeight + 300,
       }}
       showsVerticalScrollIndicator={false}
     />

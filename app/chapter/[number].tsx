@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { View, Alert, FlatList } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useChapter } from "../../hooks/useChapter";
+import { useReadingProgress } from "../../hooks/useReadingProgress";
 import { ChapterHeader } from "../../components/quran/ChapterHeader";
 import { VerseCard } from "../../components/quran/VerseCard";
 import { ChapterTitle } from "../../components/quran/ChapterTitle";
@@ -13,11 +14,13 @@ export default function ChapterPage() {
     verse?: string;
   }>();
   const { chapter, isLoading, error } = useChapter({ chapterNumber: number });
+  const { updateProgress } = useReadingProgress();
   const flatListRef = useRef<FlatList>(null);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showTranslation, setShowTranslation] = useState<string>("both");
   const [fontSize, setFontSize] = useState<string>("medium");
+  const [visibleVerses, setVisibleVerses] = useState<number[]>([]);
 
   const fontSizeOptions = [
     { value: "small", label: "Small" },
@@ -34,6 +37,34 @@ export default function ChapterPage() {
 
   const handleNavigateBack = () => {
     router.replace("/quran");
+  };
+
+  // Update reading progress when user scrolls
+  const handleViewableItemsChanged = useCallback(
+    ({ viewableItems }: { viewableItems: any[] }) => {
+      if (viewableItems.length > 0 && chapter) {
+        const currentVerses = viewableItems.map(
+          (item) => item.item.ayah_number
+        );
+        setVisibleVerses(currentVerses);
+
+        // Update progress to the first visible verse
+        const firstVisibleVerse = currentVerses[0];
+        if (firstVisibleVerse) {
+          updateProgress(
+            parseInt(number),
+            firstVisibleVerse,
+            chapter.surah_name
+          );
+        }
+      }
+    },
+    [chapter, number, updateProgress]
+  );
+
+  const viewabilityConfig = {
+    itemVisiblePercentThreshold: 50,
+    minimumViewTime: 1000, // 1 second
   };
 
   useEffect(() => {
@@ -157,8 +188,10 @@ export default function ChapterPage() {
         removeClippedSubviews={false}
         maxToRenderPerBatch={20}
         windowSize={20}
-        initialNumToRender={verse ? Math.max(30, parseInt(verse) + 10) : 30} // Dynamic initial render
+        initialNumToRender={verse ? Math.max(30, parseInt(verse) + 10) : 30}
         onScrollToIndexFailed={handleScrollToIndexFailed}
+        onViewableItemsChanged={handleViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
       />
     </View>
   );
