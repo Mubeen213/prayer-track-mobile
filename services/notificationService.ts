@@ -1,5 +1,6 @@
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
+import { router } from "expo-router";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -7,7 +8,6 @@ import { api } from "../config/axios";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
     shouldShowBanner: true,
@@ -186,11 +186,49 @@ class NotificationService {
   ) {
     const { data } = response.notification.request.content;
 
-    // Navigate based on notification type
-    if (data?.type === "new_event" && data?.mosqueId) {
-      // Navigate to mosque events page
-      // You can use your navigation logic here
-      console.log("Navigating to mosque events:", data.mosqueId);
+    if (!data?.mosqueId) {
+      console.warn("No mosqueId found in notification data");
+      return;
+    }
+
+    const mosqueId = typeof data.mosqueId === "string" ? data.mosqueId : "";
+    const type = data.type;
+
+    switch (type) {
+      case "event_updated":
+      case "event_deleted":
+      case "new_event":
+        // Navigate to mosque page - could add query params for specific sections
+        this.navigateToMosqueEvents(mosqueId);
+        break;
+
+      case "prayer_times_updated":
+        // Navigate to mosque page
+        this.navigateToMosque(mosqueId);
+        break;
+
+      default:
+        // Fallback to general mosque page
+        this.navigateToMosque(mosqueId);
+        break;
+    }
+  }
+
+  private navigateToMosque(mosqueId: string) {
+    try {
+      console.log(`Navigate to mosque`);
+      router.push(`/mosque/${mosqueId}`);
+    } catch (error) {
+      console.error("Error navigating to mosque:", error);
+    }
+  }
+
+  private navigateToMosqueEvents(mosqueId: string) {
+    try {
+      console.log(`Navigating to mosque events: ${mosqueId}`);
+      router.push(`/mosque/${mosqueId}?tab=events`);
+    } catch (error) {
+      console.error("Error navigating to mosque events:", error);
     }
   }
 

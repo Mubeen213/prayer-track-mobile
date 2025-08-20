@@ -15,11 +15,29 @@ import { Bookmark, ChevronLeft } from "lucide-react-native";
 export const MosqueDetails = () => {
   const router = useRouter();
   const { userId } = useAuth();
+  const { id, from, tab } = useLocalSearchParams<{
+    id: string;
+    from?: string;
+    tab?: string;
+  }>();
   const [activeTab, setActiveTab] = useState<"timings" | "events">("timings");
-  const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
   const [optimisticFavorite, setOptimisticFavorite] = useState<boolean | null>(
     null
   );
+
+  useEffect(() => {
+    if (tab === "events") {
+      setActiveTab("events");
+    } else if (tab === "timings") {
+      setActiveTab("timings");
+    }
+  }, [tab]);
+
+  const handleTabChange = useCallback((newTab: "timings" | "events") => {
+    setActiveTab(newTab);
+    // Optionally update the URL to reflect current tab
+    // router.setParams({ tab: newTab });
+  }, []);
 
   const { data: mosque, isLoading: isLoadingMosque } = useMosque(id || "");
 
@@ -138,7 +156,7 @@ export const MosqueDetails = () => {
               {["timings", "events"].map((tab) => (
                 <TouchableOpacity
                   key={tab}
-                  onPress={() => setActiveTab(tab as "timings" | "events")}
+                  onPress={() => handleTabChange(tab as "timings" | "events")}
                   className={`flex-1 py-2 px-4 rounded-lg ${
                     activeTab === tab ? "bg-green-500" : "bg-gray-100"
                   }`}
