@@ -14,9 +14,6 @@ export const handleShare = async (
       return;
     }
 
-    // Generate deep link
-    const appDeepLink = `${process.env.EXPO_PUBLIC_APP_DEEP_LINK_SCHEME}://event/${event.id}?mosqueId=${mosqueId}`;
-
     // Format the message
     const eventMessage = [
       `🕌 *${event.title}*`,
@@ -27,7 +24,7 @@ export const handleShare = async (
       event.scholar ? `👨‍🏫 Speaker: ${event.scholar}` : "",
       event.description ? `\n📝 ${event.description}` : "",
       "",
-      "Join us for this special event! 🤲"
+      "Join us for this special event! 🤲",
     ]
       .filter(Boolean)
       .join("\n");
@@ -35,7 +32,6 @@ export const handleShare = async (
     const shareOptions = {
       message: eventMessage,
       title: `${event.title} - ${mosqueName}`,
-      url: Platform.OS === "ios" ? appDeepLink : undefined,
     };
 
     const result = await Share.share(shareOptions);
