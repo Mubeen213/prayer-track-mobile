@@ -4,7 +4,7 @@
     "slug": "prayertrackmobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/quran.png",
+    "icon": "./assets/adaptive-android-quran-icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
@@ -19,7 +19,6 @@
     "android": {
       "package": "com.mubeen21.prayertrackmobile",
       "permissions": [
-        "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION"
       ],
       "edgeToEdgeEnabled": true,
