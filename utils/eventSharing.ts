@@ -21,7 +21,7 @@ export const handleShare = async (
       "",
       `📅 Date: ${event.event_date}`,
       `⏰ Time: ${convert24to12(event.event_time)}`,
-      event.scholar ? `👨‍🏫 Speaker: ${event.scholar}` : "",
+      event.scholar ? `Speaker: ${event.scholar}` : "",
       event.description ? `\n📝 ${event.description}` : "",
       "",
       "Join us for this special event! 🤲",
