@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "PrayerTrack Mobile",
+    "name": "Prayer Track",
     "slug": "prayertrackmobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -45,10 +45,10 @@
         }
       ],
       [
-      "expo-splash-screen",
+        "expo-splash-screen",
         {
           "backgroundColor": "#ffffff",
-          "image": "./assets/quran.png",
+          "image": "./assets/adaptive-android-quran-icon.png",
           "imageWidth": 200
         }
       ]
