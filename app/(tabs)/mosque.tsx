@@ -77,7 +77,7 @@ export default function MosqueTab() {
     isRequestingLocation || (locationLoading && isRequestingLocation);
 
   return (
-    <View className="flex-1 bg-gray-50 mb-8">
+    <View className="flex-1 bg-gray-50">
       {/* Header */}
       <View className="px-4 py-2">
         {/* Search Container */}

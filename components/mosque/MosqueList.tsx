@@ -1,10 +1,9 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { View, Text, FlatList, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
-import { InfiniteData } from "@tanstack/react-query";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMosques, useNearbyMosques } from "../../hooks/useMosques";
 import { MosqueCard } from "./MosqueCard";
-import { MosquesResponse } from "../../types/mosque";
 import { useAuth } from "../../hooks/useAuth";
 import { Mosque } from "../../types/mosque";
 import {
@@ -30,6 +29,8 @@ export const MosqueList: React.FC<MosqueListProps> = ({
     userId || null
   ) as { data: Record<string, boolean> };
   const favoritesMutation = useFavoritesMutation(userId || null);
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = 80;
 
   // Regular search/browse mosques from cache
   const {
@@ -72,7 +73,9 @@ export const MosqueList: React.FC<MosqueListProps> = ({
     : isSearchFetchingNext;
 
   // Flatten the paginated data
-  const mosques = data?.pages?.flatMap((page) => page.mosques) || [];
+  const mosques = useMemo(() => {
+    return data?.pages?.flatMap((page) => page.mosques) || [];
+  }, [data]);
 
   const handleLoadMore = () => {
     if (hasNextPage && !isFetchingNextPage && fetchNextPage) {
@@ -157,7 +160,10 @@ export const MosqueList: React.FC<MosqueListProps> = ({
         ListFooterComponent={renderFooter}
         ListEmptyComponent={renderEmpty}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={mosques.length === 0 ? { flex: 1 } : undefined}
+        contentContainerStyle={{
+          flex: mosques.length === 0 ? 1 : undefined,
+          paddingBottom: insets.bottom + tabBarHeight + 30,
+        }}
       />
     </View>
   );
