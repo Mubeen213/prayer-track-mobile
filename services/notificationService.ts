@@ -24,6 +24,9 @@ export interface PushNotificationToken {
 class NotificationService {
   private static instance: NotificationService;
   private expoPushToken: string | null = null;
+  private readonly TOKEN_STORAGE_KEY = "expoPushToken";
+  private readonly PERMISSION_ASKED_KEY = "notificationPermissionAsked";
+  private readonly PERMISSION_DENIED_KEY = "notificationPermissionDenied";
 
   private constructor() {}
 
@@ -34,38 +37,52 @@ class NotificationService {
     return NotificationService.instance;
   }
 
-  async initialize(): Promise<string | null> {
+  private async hasAskedPermissionBefore(): Promise<boolean> {
     try {
-      // Check if device supports push notifications
+      const asked = await AsyncStorage.getItem(this.PERMISSION_ASKED_KEY);
+      return asked === "true";
+    } catch {
+      return false;
+    }
+  }
+
+  private async markPermissionAsked(): Promise<void> {
+    try {
+      await AsyncStorage.setItem(this.PERMISSION_ASKED_KEY, "true");
+    } catch (error) {
+      console.error("Error marking permission as asked:", error);
+    }
+  }
+
+  private async wasPermissionDenied(): Promise<boolean> {
+    try {
+      const denied = await AsyncStorage.getItem(this.PERMISSION_DENIED_KEY);
+      return denied === "true";
+    } catch {
+      return false;
+    }
+  }
+
+  private async markPermissionDenied(denied: boolean): Promise<void> {
+    try {
+      await AsyncStorage.setItem(this.PERMISSION_DENIED_KEY, denied.toString());
+    } catch (error) {
+      console.error("Error marking permission denial:", error);
+    }
+  }
+
+  private async generateToken(): Promise<string | null> {
+    try {
       if (!Device.isDevice) {
-        // console.warn("Push notifications only work on physical devices");
         return null;
       }
 
-      // Request permissions
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-
-      if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-
-      if (finalStatus !== "granted") {
-        console.warn("Failed to get push token for push notification!");
-        return null;
-      }
-
-      // Get project ID from different possible locations
       const projectId =
         Constants?.expoConfig?.extra?.eas?.projectId ??
         Constants?.easConfig?.projectId;
 
       if (!projectId) {
         console.error("Project ID not found. Please configure EAS project.");
-        console.log("Constants.expoConfig:", Constants.expoConfig);
-        console.log("Constants.easConfig:", Constants.easConfig);
         return null;
       }
 
@@ -73,16 +90,99 @@ class NotificationService {
         projectId,
       });
 
-      this.expoPushToken = tokenData.data;
-
-      // Store token locally
-      await AsyncStorage.setItem("expoPushToken", this.expoPushToken);
-
-      // console.log("Expo push token:", this.expoPushToken);
-      return this.expoPushToken;
+      return tokenData.data;
     } catch (error) {
-      console.error("Error getting push notification token:", error);
+      console.error("Error generating push token:", error);
       return null;
+    }
+  }
+
+  async requestPermissionsAndGetToken(): Promise<string | null> {
+    try {
+      if (!Device.isDevice) {
+        return null;
+      }
+
+      // Check if we already asked and user denied
+      const alreadyAsked = await this.hasAskedPermissionBefore();
+      const wasDenied = await this.wasPermissionDenied();
+
+      if (alreadyAsked && wasDenied) {
+        console.log(
+          "Notification permissions previously denied, not asking again"
+        );
+        return null;
+      }
+
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== "granted") {
+        if (!alreadyAsked) {
+          // Only ask if we haven't asked before
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+          await this.markPermissionAsked();
+
+          if (status !== "granted") {
+            await this.markPermissionDenied(true);
+          }
+        } else {
+          console.log("Permissions not granted and already asked before");
+          return null;
+        }
+      } else {
+        // Permission is granted, clear any previous denial
+        await this.markPermissionDenied(false);
+      }
+
+      if (finalStatus !== "granted") {
+        console.log("Notification permissions denied");
+        return null;
+      }
+
+      return await this.generateToken();
+    } catch (error) {
+      console.error("Error requesting permissions and getting token:", error);
+      return null;
+    }
+  }
+
+  async silentTokenRegistration(userId: string): Promise<boolean> {
+    try {
+      let token = await this.getStoredToken();
+
+      if (token) {
+        console.log("Token already exists, skipping registration");
+        return true;
+      }
+      const { status } = await Notifications.getPermissionsAsync();
+
+      if (status !== "granted") {
+        console.log("Notifications not granted, skipping silent registration");
+        return false;
+      }
+      token = await this.generateToken();
+
+      if (!token) {
+        console.log("Failed to generate token for silent registration");
+        return false;
+      }
+
+      // Register with server
+      const success = await this.registerTokenWithServerInternal(userId, token);
+
+      if (success) {
+        // Clear any previous denial since user has granted permissions
+        await this.markPermissionDenied(false);
+        console.log("Silent token registration successful");
+      }
+
+      return success;
+    } catch (error) {
+      console.error("Error in silent token registration:", error);
+      return false;
     }
   }
 
@@ -92,7 +192,7 @@ class NotificationService {
         return this.expoPushToken;
       }
 
-      const storedToken = await AsyncStorage.getItem("expoPushToken");
+      const storedToken = await AsyncStorage.getItem(this.TOKEN_STORAGE_KEY);
       if (storedToken) {
         this.expoPushToken = storedToken;
         return storedToken;
@@ -107,28 +207,51 @@ class NotificationService {
 
   async registerTokenWithServer(userId: string): Promise<boolean> {
     try {
-      const token = (await this.getStoredToken()) || (await this.initialize());
+      // Check stored token first
+      let token = await this.getStoredToken();
 
       if (!token) {
-        // console.warn("No push token available to register");
+        token = await this.requestPermissionsAndGetToken();
+      }
+
+      if (!token) {
+        console.log("No push token available for registration");
         return false;
       }
 
+      return await this.registerTokenWithServerInternal(userId, token);
+    } catch (error) {
+      console.error("Error registering push token with server:", error);
+      return false;
+    }
+  }
+
+  private async registerTokenWithServerInternal(
+    userId: string,
+    token: string
+  ): Promise<boolean> {
+    try {
       const tokenData: PushNotificationToken = {
         token,
         platform: Platform.OS,
         deviceId: Device.osInternalBuildId || undefined,
       };
 
-      await api.post("/notifications/register-token", {
+      const response = await api.post("/notifications/register-token", {
         userId,
         ...tokenData,
       });
 
-      console.log("Push token registered with server successfully");
-      return true;
+      if (response.status === 200 || response.status === 201) {
+        await AsyncStorage.setItem(this.TOKEN_STORAGE_KEY, token);
+        this.expoPushToken = token;
+        console.log("Push token registered with server successfully");
+        return true;
+      } else {
+        throw new Error(`Server returned status: ${response.status}`);
+      }
     } catch (error) {
-      console.error("Error registering push token with server:", error);
+      console.error("Error in server token registration:", error);
       return false;
     }
   }
@@ -145,8 +268,8 @@ class NotificationService {
         data: { userId, token },
       });
 
-      // Clear local storage
-      await AsyncStorage.removeItem("expoPushToken");
+      // Clear storage after successful unregistration
+      await AsyncStorage.removeItem(this.TOKEN_STORAGE_KEY);
       this.expoPushToken = null;
 
       console.log("Push token unregistered successfully");
@@ -157,19 +280,26 @@ class NotificationService {
     }
   }
 
+  // Method to clear permission state (useful for testing or settings reset)
+  async resetPermissionState(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem(this.PERMISSION_ASKED_KEY);
+      await AsyncStorage.removeItem(this.PERMISSION_DENIED_KEY);
+      console.log("Notification permission state reset");
+    } catch (error) {
+      console.error("Error resetting permission state:", error);
+    }
+  }
+
   setupNotificationListeners() {
-    // Handle notifications received while app is foregrounded
     const foregroundSubscription =
       Notifications.addNotificationReceivedListener((notification) => {
         console.log("Notification received in foreground:", notification);
-        // Handle foreground notification display
       });
 
-    // Handle notification responses (when user taps notification)
     const responseSubscription =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log("Notification response:", response);
-        // Handle navigation based on notification data
         this.handleNotificationResponse(response);
       });
 
@@ -196,17 +326,14 @@ class NotificationService {
       case "event_updated":
       case "event_deleted":
       case "new_event":
-        // Navigate to mosque page - could add query params for specific sections
         this.navigateToMosqueEvents(mosqueId);
         break;
 
       case "prayer_times_updated":
-        // Navigate to mosque page
         this.navigateToMosque(mosqueId);
         break;
 
       default:
-        // Fallback to general mosque page
         this.navigateToMosque(mosqueId);
         break;
     }
@@ -229,21 +356,6 @@ class NotificationService {
       console.error("Error navigating to mosque events:", error);
     }
   }
-
-  // async scheduleLocalNotification(title: string, body: string, data?: any) {
-  //   try {
-  //     await Notifications.scheduleNotificationAsync({
-  //       content: {
-  //         title,
-  //         body,
-  //         data,
-  //       },
-  //       trigger: { type: Notifications.TriggerType.TIME_INTERVAL, seconds: 1 },
-  //     });
-  //   } catch (error) {
-  //     console.error("Error scheduling local notification:", error);
-  //   }
-  // }
 }
 
 export default NotificationService.getInstance();

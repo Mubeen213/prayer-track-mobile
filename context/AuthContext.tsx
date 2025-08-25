@@ -1,16 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import * as SecureStore from "expo-secure-store";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import { api } from "../config/axios";
-import { REGISTER_USER } from "../utils/urls";
 import {
-  getOrCreateUserId,
-  fetchUserData,
+  storeUserId,
+  getStoredUserId,
   storeUserData,
   getStoredUserData,
   clearUserData,
 } from "../services/userService";
+import { AuthService } from "../services/authService";
 import NotificationService from "../services/notificationService";
 import { User } from "../types/user";
 import { AuthContextType } from "../types/auth";
@@ -30,37 +30,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const initAuth = async () => {
     try {
+      setIsLoading(true);
+
       // if (__DEV__) {
       //   console.log("Running in development mode, clearing user ID.");
       //   await AsyncStorage.clear();
       //   await SecureStore.deleteItemAsync("userId");
       // }
-      setIsLoading(true);
 
-      const { userId: currentUserId, isNew } = await getOrCreateUserId();
-      setUserId(currentUserId);
+      // Check if we have a stored user ID
+      const storedUserId = await getStoredUserId();
 
-      // Set user ID in API headers for all requests
-      api.defaults.headers.common["x-user-id"] = currentUserId;
-
-      // Register new user with server with notification token
-      if (isNew) {
-        await api.post(REGISTER_USER, {
-          user_id: currentUserId,
-          platform: Platform.OS,
-        });
-        await NotificationService.registerTokenWithServer(currentUserId);
-      }
-
-      const cachedUserData = await getStoredUserData();
-      if (cachedUserData) {
-        setUser(cachedUserData);
+      if (storedUserId) {
+        // User exists, load cached data only
+        await handleExistingUser(storedUserId);
       } else {
-        const freshUserData = await fetchUserData(currentUserId);
-        if (freshUserData) {
-          setUser(freshUserData);
-          await storeUserData(freshUserData);
-        }
+        // New user, register with server
+        await handleNewUser();
       }
     } catch (error) {
       console.error("Auth initialization error:", error);
@@ -69,11 +55,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const handleExistingUser = async (storedUserId: string) => {
+    try {
+      setUserId(storedUserId);
+      api.defaults.headers.common["x-user-id"] = storedUserId;
+      const cachedUserData = await getStoredUserData();
+      if (cachedUserData) {
+        setUser(cachedUserData);
+      }
+
+      // Silently check and register notification token if permissions granted
+      await NotificationService.silentTokenRegistration(storedUserId);
+    } catch (error) {
+      console.error("Error handling existing user:", error);
+      // If there's an error, treat as new user
+      await clearUserData();
+      await handleNewUser();
+    }
+  };
+
+  const handleNewUser = async () => {
+    try {
+      // Register new user with server
+      const newUser = await AuthService.registerUser(Platform.OS);
+      await storeUserId(newUser.id);
+      await storeUserData(newUser);
+
+      setUserId(newUser.id);
+      setUser(newUser);
+      api.defaults.headers.common["x-user-id"] = newUser.id;
+      await NotificationService.registerTokenWithServer(newUser.id);
+
+      console.log("New user registered successfully:", newUser.id);
+    } catch (error) {
+      console.error("Failed to register new user:", error);
+      // Don't store anything if registration fails
+    }
+  };
+
   const refreshUser = async () => {
     if (!userId) return;
 
     try {
-      const freshUserData = await fetchUserData(userId);
+      const freshUserData = await AuthService.fetchUserData();
       if (freshUserData) {
         setUser(freshUserData);
         await storeUserData(freshUserData);
@@ -85,12 +109,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     try {
+      if (userId) {
+        await NotificationService.unregisterToken(userId);
+      }
       await clearUserData();
       setUser(null);
       setUserId(null);
       delete api.defaults.headers.common["x-user-id"];
     } catch (error) {
       console.error("Logout error:", error);
+    }
+  };
+
+  const retryNotificationSetup = async (): Promise<boolean> => {
+    if (!userId) return false;
+
+    try {
+      const success = await NotificationService.silentTokenRegistration(userId);
+      if (success) {
+        console.log("Notification setup successful after retry");
+      }
+      return success;
+    } catch (error) {
+      console.error("Error retrying notification setup:", error);
+      return false;
     }
   };
 
@@ -113,6 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     hasAnyRole,
     refreshUser,
     logout,
+    retryNotificationSetup,
   };
 
   return (

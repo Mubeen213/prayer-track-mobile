@@ -43,7 +43,6 @@ export default function RootLayout() {
     const initializeNotifications = async () => {
       if (Device.isDevice) {
         try {
-          await NotificationService.initialize();
           const cleanup = NotificationService.setupNotificationListeners();
           return cleanup;
         } catch (error) {

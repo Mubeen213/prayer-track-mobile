@@ -1,8 +1,11 @@
 import { Platform, Linking, Alert } from "react-native";
 
 export const openMaps = async (lat: number, lng: number): Promise<void> => {
-  const appleMapsUrl = `maps://maps.apple.com/?q=${lat},${lng}&z=16`;
+  // Correct Apple Maps deep link
+  const appleMapsUrl = `maps://?ll=${lat},${lng}`;
+  // Android geo URI
   const androidGeoUrl = `geo:${lat},${lng}?q=${lat},${lng}`;
+  // Web fallback (Google Maps)
   const googleMapsWebUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 
   const url = Platform.select({
@@ -16,9 +19,9 @@ export const openMaps = async (lat: number, lng: number): Promise<void> => {
       console.log("Opening maps with URL:", url);
       const supported = await Linking.canOpenURL(url);
       if (supported) {
-        await Linking.openURL(url);
-      } else {
         await Linking.openURL(googleMapsWebUrl);
+      } else {
+        await Linking.openURL(googleMapsWebUrl); 
       }
     }
   } catch (err) {

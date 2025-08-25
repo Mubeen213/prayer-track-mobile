@@ -9,4 +9,5 @@ export type AuthContextType = {
   hasAnyRole: (roles: string[]) => boolean;
   refreshUser: () => Promise<void>;
   logout: () => Promise<void>;
+  retryNotificationSetup: () => Promise<boolean>;
 };

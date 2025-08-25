@@ -1,42 +1,29 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import "react-native-get-random-values";
 import * as SecureStore from "expo-secure-store";
-import { v4 as uuidv4 } from "uuid";
-import { api } from "../config/axios";
 import { User } from "../types/user";
+import { AuthService } from "./authService";
 
 const STORAGE_KEYS = {
   userId: "userId",
   userData: "userData_v1",
 };
 
-export const getOrCreateUserId = async (): Promise<{
-  userId: string;
-  isNew: boolean;
-}> => {
+export const storeUserId = async (userId: string): Promise<void> => {
   try {
-    let userId = await SecureStore.getItemAsync(STORAGE_KEYS.userId);
-
-    if (!userId) {
-      userId = uuidv4();
-      await SecureStore.setItemAsync(STORAGE_KEYS.userId, userId);
-      return { userId, isNew: true };
-    }
-
-    return { userId, isNew: false };
+    await SecureStore.setItemAsync(STORAGE_KEYS.userId, userId);
   } catch (error) {
-    console.error("Error managing user ID:", error);
-    const fallbackId = uuidv4();
-    return { userId: fallbackId, isNew: true };
+    console.error("Error storing user ID:", error);
+    throw error;
   }
 };
 
-export const fetchUserData = async (userId: string): Promise<User | null> => {
+export const getStoredUserId = async (): Promise<string | null> => {
   try {
-    const response = await api.get(`/auth/me`);
-    return response.data;
+    const user_id = await SecureStore.getItemAsync(STORAGE_KEYS.userId);
+    console.log(`Stored user ID: ${user_id}`);
+    return user_id;
   } catch (error) {
-    console.error("Error fetching user data:", error);
+    console.error("Error getting stored user ID:", error);
     return null;
   }
 };
@@ -46,6 +33,7 @@ export const storeUserData = async (userData: User): Promise<void> => {
     await AsyncStorage.setItem(STORAGE_KEYS.userData, JSON.stringify(userData));
   } catch (error) {
     console.error("Error storing user data:", error);
+    throw error;
   }
 };
 
@@ -75,7 +63,7 @@ export class UserService {
   ): Promise<boolean> {
     try {
       console.log("Syncing user data from server...");
-      const userData = await fetchUserData(userId);
+      const userData = await AuthService.fetchUserData();
 
       if (userData) {
         await storeUserData(userData);
