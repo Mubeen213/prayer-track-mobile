@@ -4,19 +4,24 @@
     "slug": "prayertrackmobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/adaptive-android-quran-icon.png",
+    "icon":"./assets/ios-quran-icon-light.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
+      "buildNumber": "1",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to find nearby mosques for prayer times.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to find nearby mosques for prayer times.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       },
       "supportsTablet": true,
       "bundleIdentifier": "com.mubeen21.prayertrackmobile"
     },
     "android": {
+      "versionCode": 1,
       "package": "com.mubeen21.prayertrackmobile",
       "permissions": [
         "ACCESS_FINE_LOCATION"
@@ -39,16 +44,17 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification-icon.png",
-          "color": "#ffffff"
+          "icon":"./assets/ios-quran-icon-light.png",
+          "color": "#ffffff",
+          "iosDisplayInForeground": true
         }
       ],
       [
         "expo-splash-screen",
         {
           "backgroundColor": "#ffffff",
-          "image": "./assets/adaptive-android-quran-icon.png",
-          "imageWidth": 200
+          "image": "./assets/ios-quran-icon-light.png",
+          "imageWidth": 400
         }
       ]
     ],
