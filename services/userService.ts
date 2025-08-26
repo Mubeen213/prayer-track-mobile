@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from "expo-secure-store";
+// import * as SecureStore from "expo-secure-store";
 import { User } from "../types/user";
 import { AuthService } from "./authService";
 
@@ -10,7 +10,7 @@ const STORAGE_KEYS = {
 
 export const storeUserId = async (userId: string): Promise<void> => {
   try {
-    await SecureStore.setItemAsync(STORAGE_KEYS.userId, userId);
+    await AsyncStorage.setItem(STORAGE_KEYS.userId, userId);
   } catch (error) {
     console.error("Error storing user ID:", error);
     throw error;
@@ -19,7 +19,7 @@ export const storeUserId = async (userId: string): Promise<void> => {
 
 export const getStoredUserId = async (): Promise<string | null> => {
   try {
-    const user_id = await SecureStore.getItemAsync(STORAGE_KEYS.userId);
+    const user_id = await AsyncStorage.getItem(STORAGE_KEYS.userId);
     console.log(`Stored user ID: ${user_id}`);
     return user_id;
   } catch (error) {
@@ -50,7 +50,7 @@ export const getStoredUserData = async (): Promise<User | null> => {
 export const clearUserData = async (): Promise<void> => {
   try {
     await AsyncStorage.removeItem(STORAGE_KEYS.userData);
-    await SecureStore.deleteItemAsync(STORAGE_KEYS.userId);
+    await AsyncStorage.removeItem(STORAGE_KEYS.userId);
   } catch (error) {
     console.error("Error clearing user data:", error);
   }
