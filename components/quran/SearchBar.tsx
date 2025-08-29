@@ -41,7 +41,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   };
   return (
     <View className="flex-1 justify-center items-center p-4 mb-6">
-      <View className="mb-6 w-full max-w-md">
+      <View className="mb-6 w-full">
         <View className="flex-row">
           <TextInput
             className="flex-1 rounded-lg border border-gray-300 mr-2 text-gray-900"
