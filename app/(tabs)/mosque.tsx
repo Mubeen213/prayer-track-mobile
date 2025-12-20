@@ -79,13 +79,13 @@ export default function MosqueTab() {
   return (
     <View className="flex-1 bg-gray-50">
       {/* Header */}
-      <View className="px-4 py-2">
-        {/* Search Container */}
-        <View className="bg-white rounded-xl shadow-sm border border-gray-200 p-2 mb-4">
+      <View className="absolute top-0 left-0 right-0 z-10 px-4 pt-2">
+        {/* Floating Search Container */}
+        <View className="bg-white rounded-full shadow-md border border-gray-100 p-2 flex-row items-center">
           {/* Search Input */}
-          <View className="relative mb-2">
+          <View className="flex-1">
             <TextInput
-              className="bg-gray-50 rounded-lg pl-10 pr-4 py-3 text-gray-900"
+              className="pl-4 pr-4 py-2 text-gray-900 h-10"
               placeholder="Search mosques..."
               value={searchQuery}
               onChangeText={handleSearch}
@@ -94,41 +94,37 @@ export default function MosqueTab() {
             />
           </View>
 
-          {/* Near Me Button */}
+          {/* Near Me Button (Small Icon) */}
           <TouchableOpacity
             onPress={handleNearbyPress}
             disabled={isLoading}
-            className={`border border-gray-200 rounded-lg py-3 flex-row items-center justify-center ${
+            className={`w-10 h-10 rounded-full items-center justify-center mr-1 ${
               isLoading
                 ? "bg-gray-100"
                 : isNearbyMode
-                  ? "bg-green-50 border-green-200"
-                  : "bg-white"
+                  ? "bg-emerald-500"
+                  : "bg-gray-100"
             }`}
           >
             {isLoading ? (
               <ActivityIndicator size="small" color="#10B981" />
             ) : (
-              <MapPin size={20} color={isNearbyMode ? "#059669" : "#10B981"} />
+              <MapPin size={20} color={isNearbyMode ? "#fff" : "#6b7280"} />
             )}
-            <Text
-              className={`font-medium ml-2 ${
-                isLoading
-                  ? "text-gray-400"
-                  : isNearbyMode
-                    ? "text-green-700"
-                    : "text-gray-700"
-              }`}
-            >
-              {isLoading
-                ? "Finding Nearby Mosques..."
-                : isNearbyMode
-                  ? "Showing Nearby Mosques"
-                  : "Find Mosques Near Me"}
-            </Text>
           </TouchableOpacity>
         </View>
+
+        {isNearbyMode && (
+            <View className="mt-2 flex-row justify-center">
+                <View className="bg-emerald-100 px-3 py-1 rounded-full">
+                    <Text className="text-emerald-700 text-xs font-medium">Showing Results Nearby</Text>
+                </View>
+            </View>
+        )}
       </View>
+      
+      {/* Spacer for floating header */}
+      <View style={{ height: 80 }} />
 
       {/* Mosque List */}
       <MosqueList

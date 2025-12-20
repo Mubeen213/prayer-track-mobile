@@ -7,6 +7,7 @@ import { ChapterHeader } from "../../components/quran/ChapterHeader";
 import { VerseCard } from "../../components/quran/VerseCard";
 import { ChapterTitle } from "../../components/quran/ChapterTitle";
 import { ChapterSkeleton } from "../../components/ui/ChapterSkeleton";
+import { useVerseFavorites } from "../../hooks/useVerseFavorites";
 
 export default function ChapterPage() {
   const { number, verse } = useLocalSearchParams<{
@@ -15,6 +16,7 @@ export default function ChapterPage() {
   }>();
   const { chapter, isLoading, error } = useChapter({ chapterNumber: number });
   const { updateProgress } = useReadingProgress();
+  const { isFavorite, toggleFavorite } = useVerseFavorites();
   const flatListRef = useRef<FlatList>(null);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -149,6 +151,10 @@ export default function ChapterPage() {
       getTranslationFontSize={getTranslationFontSize}
       toArabicNumeral={toArabicNumeral}
       isHighlighted={verse ? ayah.ayah_number === parseInt(verse) : false}
+      isFavorite={isFavorite(parseInt(number), ayah.ayah_number)}
+      onToggleFavorite={() =>
+        toggleFavorite(parseInt(number), ayah.ayah_number, chapter.surah_name)
+      }
     />
   );
 

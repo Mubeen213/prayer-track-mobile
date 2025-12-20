@@ -1,6 +1,4 @@
 import React from "react";
-import { StyleSheet } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { View, Text, TouchableOpacity } from "react-native";
 
 interface ChapterCardProps {
@@ -15,62 +13,27 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   onPress,
 }) => {
   return (
-    <TouchableOpacity onPress={onPress} style={styles.button}>
-      <View style={styles.rowContainer}>
-        <View style={styles.gradientContainer}>
-          <LinearGradient
-            colors={["#22c55e", "#059669"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.gradient}
-          >
-            <Text style={styles.numberText}>{number}</Text>
-          </LinearGradient>
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      className="bg-white p-4 mb-3 rounded-2xl shadow-sm border border-gray-100 flex-row items-center justify-between"
+    >
+      <View className="flex-row items-center gap-4">
+        {/* Index Circle */}
+        <View className="w-10 h-10 rounded-full bg-emerald-50 items-center justify-center">
+            <Text className="text-emerald-600 font-bold font-sans">{number}</Text>
         </View>
+        
+        {/* English Name (Placeholder if we had it) or just Number Label */}
         <View>
-          <Text style={styles.nameText}>{name}</Text>
+             <Text className="text-gray-400 text-xs uppercase tracking-wider font-medium">Chapter {number}</Text>
         </View>
       </View>
+
+      {/* Arabic Name */}
+      <Text className="text-xl font-bold text-gray-800 font-amiri min-w-[100px] text-right">
+        {name}
+      </Text>
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    padding: 24,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
-    elevation: 2,
-    marginBottom: 16,
-  },
-  rowContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  gradientContainer: {
-    height: 40,
-    width: 40,
-    borderRadius: 20,
-    overflow: "hidden",
-  },
-  gradient: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  numberText: {
-    color: "white",
-    fontWeight: "500",
-  },
-  nameText: {
-    fontSize: 18,
-    lineHeight: 28,
-    fontWeight: "500",
-    color: "#1f2937",
-  },
-});
