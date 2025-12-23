@@ -81,7 +81,7 @@ export default function RootLayout() {
             <AppContent />
           </SafeAreaView>
         </AuthProvider>
-        <Toast />
+        <Toast  />
       </SafeAreaProvider>
     </QueryClientProvider>
   );

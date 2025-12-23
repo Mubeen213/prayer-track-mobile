@@ -71,6 +71,8 @@ export const useVerseFavorites = () => {
       Toast.show({
         type: "error",
         text1: "Failed to update Favorites",
+        visibilityTime: 3000,
+        autoHide: true,
       });
     },
   });

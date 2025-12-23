@@ -21,6 +21,8 @@ export const useCreateClaimRequest = () => {
         type: "success",
         text1: "Claim Request Submitted",
         text2: "Your claim request has been submitted successfully",
+        visibilityTime: 3000,
+        autoHide: true,
       });
       queryClient.invalidateQueries({ queryKey: ["my-claims"] });
     },
@@ -31,6 +33,8 @@ export const useCreateClaimRequest = () => {
         type: "error",
         text1: "Submission Failed",
         text2: message,
+        visibilityTime: 3000,
+        autoHide: true,
       });
     },
   });
@@ -94,6 +98,8 @@ export const useUpdateClaimStatus = () => {
         type: variables.status === "approved" ? "success" : "info",
         text1: "Status Updated",
         text2: statusMessages[variables.status],
+        visibilityTime: 3000,
+        autoHide: true,
       });
 
       queryClient.invalidateQueries({ queryKey: ["claim-requests"] });
@@ -105,6 +111,8 @@ export const useUpdateClaimStatus = () => {
         type: "error",
         text1: "Update Failed",
         text2: message,
+        visibilityTime: 3000,
+        autoHide: true,
       });
     },
   });

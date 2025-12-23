@@ -65,6 +65,8 @@ export const useCreateEvent = () => {
         type: "success",
         text1: "Event Created Successfully",
         text2: "Your event has been created successfully",
+        visibilityTime: 3000,
+        autoHide: true,
       });
     },
     onError: () => {
@@ -72,6 +74,8 @@ export const useCreateEvent = () => {
         type: "error",
         text1: "Failed to Create Event",
         text2: "There was an error creating your event",
+        visibilityTime: 3000,
+        autoHide: true,
       });
     },
   });
@@ -112,6 +116,8 @@ export const useUpdateEvent = () => {
         type: "success",
         text1: "Event Updated Successfully",
         text2: "Your event has been updated successfully",
+        visibilityTime: 3000,
+        autoHide: true,
       });
     },
     onError: () => {
@@ -119,6 +125,8 @@ export const useUpdateEvent = () => {
         type: "error",
         text1: "Failed to Update Event",
         text2: "There was an error updating your event",
+        visibilityTime: 3000,
+        autoHide: true,
       });
     },
   });
@@ -167,6 +175,8 @@ export const useDeleteEvent = () => {
         type: "success",
         text1: "Event Deleted Successfully",
         text2: "Your event has been deleted successfully",
+        visibilityTime: 3000,
+        autoHide: true,
       });
     },
     onError: () => {
@@ -174,6 +184,8 @@ export const useDeleteEvent = () => {
         type: "error",
         text1: "Failed to Delete Event",
         text2: "There was an error deleting your event",
+        visibilityTime: 3000,
+        autoHide: true,
       });
     },
   });

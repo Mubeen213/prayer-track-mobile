@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, SafeAreaView, Alert, TouchableOpacity } from "react-native";
+import { View, Text, Alert, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ChaptersList } from "../../components/quran/ChaptersList";

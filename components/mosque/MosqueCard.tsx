@@ -36,128 +36,197 @@ export const MosqueCard = React.memo<MosqueCardProps>(
     return (
       <>
         <TouchableOpacity
-          className="bg-white rounded-2xl p-4 mx-4 my-2 shadow-sm border border-gray-100"
+          className="mx-4 my-2"
           onPress={() => onPress?.(mosque)}
-          activeOpacity={0.7}
+          activeOpacity={0.95}
+          style={{
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 12,
+            elevation: 3,
+          }}
         >
-          {/* Status Badge - Fixed curves to match card radius */}
-          {mosque.status === "active" && (
-            <View className="absolute right-0 top-0 z-10 flex-row items-center bg-green-500 rounded-bl-2xl rounded-tr-2xl px-3 py-2">
-              <CheckCircle size={14} color="white" />
-              <Text className="text-white text-xs font-medium ml-1">
-                Verified
-              </Text>
-            </View>
-          )}
+          <LinearGradient
+            colors={["#ffffff", "#fafafa"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={{
+              borderRadius: 20,
+              padding: 20,
+              borderWidth: 1,
+              borderColor: "rgba(0, 0, 0, 0.04)",
+            }}
+          >
+            {/* Status Badge */}
+            {mosque.status === "active" && (
+              <View className="absolute right-0 top-0 z-10 overflow-hidden rounded-bl-2xl rounded-tr-[20px]">
+                <LinearGradient
+                  colors={["#10b981", "#059669"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingHorizontal: 12,
+                    paddingVertical: 8,
+                  }}
+                >
+                  <CheckCircle size={14} color="white" />
+                  <Text className="text-white text-xs font-semibold ml-1.5">
+                    Verified
+                  </Text>
+                </LinearGradient>
+              </View>
+            )}
 
-          {mosque.status === "unverified" && (
-            <TouchableOpacity
-              onPress={() => setShowClaimModal(true)}
-              className="absolute right-0 top-0 z-10 flex-row items-center bg-orange-500 rounded-bl-2xl rounded-tr-2xl px-3 py-2"
-              activeOpacity={0.8}
-            >
-              <Text className="text-white text-xs font-medium">Claim Now</Text>
-            </TouchableOpacity>
-          )}
+            {mosque.status === "unverified" && (
+              <TouchableOpacity
+                onPress={() => setShowClaimModal(true)}
+                className="absolute right-0 top-0 z-10 overflow-hidden rounded-bl-2xl rounded-tr-[20px]"
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={["#f97316", "#ea580c"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingHorizontal: 12,
+                    paddingVertical: 8,
+                  }}
+                >
+                  <Text className="text-white text-xs font-semibold">
+                    Claim Now
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
 
-          {/* Header - Removed problematic icon, kept clean design */}
-          <View className="flex-row items-start mb-4 pr-20">
-            <View className="flex-1">
+            {/* Header Section */}
+            <View className="mb-4 pr-24">
               <Text
-                className="text-lg font-semibold text-gray-900 mb-2"
+                className="text-xl font-bold text-gray-900 mb-3 leading-6"
                 numberOfLines={2}
+                style={{ letterSpacing: -0.3 }}
               >
                 {mosque.name}
               </Text>
 
               <View className="flex-row items-start">
-                <MapPin size={16} color="#10B981" className="mt-0.5 mr-2" />
+                <View
+                  className="rounded-full p-1.5 mr-2 mt-0.5"
+                  style={{ backgroundColor: "rgba(16, 185, 129, 0.1)" }}
+                >
+                  <MapPin size={14} color="#10B981" strokeWidth={2.5} />
+                </View>
                 <Text
-                  className="text-sm text-gray-600 flex-1"
+                  className="text-sm text-gray-600 flex-1 leading-5"
                   numberOfLines={2}
                 >
                   {mosque.address}
                 </Text>
               </View>
             </View>
-          </View>
 
-          {/* Next Prayer Section */}
-          {nextPrayer && (
-            <LinearGradient
-              colors={["#f0fdf4", "#ecfdf5"]} // Example hex codes for the from-green-50 to-emerald-50 gradient
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{
-                padding: 16, // Equivalent to p-4
-                borderRadius: 12, // Equivalent to rounded-xl
-                marginBottom: 16,
-              }}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text
-                  style={{ fontWeight: "600", fontSize: 16, color: "#4b5563" }}
-                >
-                  Next Prayer
-                </Text>
-                <Text
+            {/* Next Prayer Section - Enhanced Design */}
+            {nextPrayer && (
+              <View className="mb-5">
+                <LinearGradient
+                  colors={["#ecfdf5", "#d1fae5"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
                   style={{
-                    fontWeight: "500",
-                    fontSize: 16,
-                    textTransform: "capitalize",
-                    color: "#047857",
-                    marginLeft: 8,
+                    borderRadius: 16,
+                    padding: 16,
+                    borderWidth: 1,
+                    borderColor: "rgba(16, 185, 129, 0.1)",
                   }}
                 >
-                  {nextPrayer.prayer_name}
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: "#4b5563",
-                    marginLeft: 4,
-                    marginRight: 4,
-                  }}
-                >
-                  at
-                </Text>
-                <Text
-                  style={{ fontWeight: "bold", fontSize: 16, color: "#064e3b" }}
-                >
-                  {convert24to12(nextPrayer.jamaat_time)}
-                </Text>
+                  <View className="flex-row items-center mb-1">
+                    <Clock size={16} color="#059669" strokeWidth={2.5} />
+                    <Text className="text-xs font-semibold text-emerald-700 ml-1.5 uppercase tracking-wide">
+                      Next Prayer
+                    </Text>
+                  </View>
+                  <View className="flex-row items-baseline mt-1">
+                    <Text
+                      className="text-2xl font-bold text-emerald-900 capitalize"
+                      style={{ letterSpacing: -0.5 }}
+                    >
+                      {nextPrayer.prayer_name}
+                    </Text>
+                    <Text className="text-base text-emerald-700 mx-2 font-medium">
+                      at
+                    </Text>
+                    <Text
+                      className="text-2xl font-bold text-emerald-900"
+                      style={{ letterSpacing: -0.5 }}
+                    >
+                      {convert24to12(nextPrayer.jamaat_time)}
+                    </Text>
+                  </View>
+                </LinearGradient>
               </View>
-            </LinearGradient>
-          )}
+            )}
 
-          {/* Action Buttons - Fixed spacing and consistency */}
-          <View className="flex-row items-center">
-            <View className="flex-1 rounded-lg overflow-hidden mr-3">
-              <LinearGradient colors={["#22c55e", "#059669"]}>
-                <Text className="text-white text-center py-3 font-medium">
-                  View Details
-                </Text>
-              </LinearGradient>
+            {/* Action Buttons - Premium Design */}
+            <View className="flex-row items-center gap-3">
+              <View className="flex-1 rounded-xl overflow-hidden">
+                <LinearGradient
+                  colors={["#10b981", "#059669"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{
+                    paddingVertical: 14,
+                    shadowColor: "#10b981",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                    elevation: 4,
+                  }}
+                >
+                  <Text className="text-white text-center font-bold text-base">
+                    View Details
+                  </Text>
+                </LinearGradient>
+              </View>
+
+              <TouchableOpacity
+                className="rounded-xl p-3.5"
+                onPress={() => onToggleFavorite?.(mosque.id)}
+                style={{
+                  backgroundColor: isFavorite
+                    ? "rgba(16, 185, 129, 0.1)"
+                    : "rgba(156, 163, 175, 0.1)",
+                  borderWidth: 1,
+                  borderColor: isFavorite
+                    ? "rgba(16, 185, 129, 0.2)"
+                    : "rgba(156, 163, 175, 0.2)",
+                }}
+              >
+                <Bookmark
+                  size={22}
+                  color={isFavorite ? "#10B981" : "#6B7280"}
+                  fill={isFavorite ? "#10B981" : "none"}
+                  strokeWidth={2}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="rounded-xl p-3.5"
+                onPress={() => openMaps(mosque.latitude, mosque.longitude)}
+                style={{
+                  backgroundColor: "rgba(156, 163, 175, 0.1)",
+                  borderWidth: 1,
+                  borderColor: "rgba(156, 163, 175, 0.2)",
+                }}
+              >
+                <MapPin size={22} color="#6B7280" strokeWidth={2} />
+              </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-              className="rounded-lg p-3  mr-3"
-              onPress={() => onToggleFavorite?.(mosque.id)}
-            >
-              <Bookmark
-                size={20}
-                color={isFavorite ? "#10B981" : "#9CA3AF"}
-                fill={isFavorite ? "#10B981" : "none"}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="rounded-lg p-3"
-              onPress={() => openMaps(mosque.latitude, mosque.longitude)}
-            >
-              <MapPin size={20} color="#9CA3AF" />
-            </TouchableOpacity>
-          </View>
+          </LinearGradient>
         </TouchableOpacity>
 
         {/* Claim Modal */}

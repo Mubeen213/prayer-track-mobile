@@ -18,6 +18,8 @@ export const useUpdateTimings = (mosqueId: string) => {
         type: "success",
         text1: "Prayer Times Updated",
         text2: "Prayer times updated successfully",
+        visibilityTime: 3000,
+        autoHide: true,
       });
 
       await MosqueService.syncMosques(true);
@@ -43,6 +45,8 @@ export const useUpdateTimings = (mosqueId: string) => {
         type: "error",
         text1: "Update Failed",
         text2: "Failed to update prayer times",
+        visibilityTime: 3000,
+        autoHide: true,
       });
     },
   });
