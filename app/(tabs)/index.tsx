@@ -1,5 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { View, ScrollView, Pressable, Modal, Alert, Text, ActivityIndicator } from "react-native";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  View,
+  ScrollView,
+  Pressable,
+  Modal,
+  Alert,
+  Text,
+  ActivityIndicator,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { FeatureCard } from "../../components/common/FeatureCard";
@@ -22,103 +30,93 @@ export default function Home() {
   );
 
   // Data Hooks
-  const { data: favorites = [], isLoading: isFavoritesLoading } = useGetFavoriteMosques(userId || null);
-  
+  const { data: favorites = [], isLoading: isFavoritesLoading } =
+    useGetFavoriteMosques(userId || null);
+
   const { location, error: locationError } = useLocation();
   // We only fetch nearby mosques if we have location and no favorites to prioritize
   const shouldFetchNearby = !favorites || favorites.length === 0;
-  const { 
-    data: nearbyMosques, 
-    isLoading: isNearbyLoading 
-  } = useNearbyMosques(
-    shouldFetchNearby ? (location?.latitude || null) : null,
-    shouldFetchNearby ? (location?.longitude || null) : null
+  const { data: nearbyMosques, isLoading: isNearbyLoading } = useNearbyMosques(
+    shouldFetchNearby ? location?.latitude || null : null,
+    shouldFetchNearby ? location?.longitude || null : null
   );
 
-  // State for TodayCard
-  const [prayerState, setPrayerState] = useState<{
-    nextPrayer?: { name: string; time: string };
-    countdown?: string;
-    source?: string;
-    error?: string;
-  }>({});
+  // Logic to determine Next Prayer - use useMemo to prevent infinite loops
+  const prayerState = useMemo(() => {
+    let selectedMosque: any = null;
+    let sourceName = "";
 
-  // Logic to determine Next Prayer
-  useEffect(() => {
-    const calculateNextPrayer = () => {
-        let selectedMosque: any = null;
-        let sourceName = "";
+    // 1. Try Favorites First
+    if (favorites && favorites.length > 0) {
+      selectedMosque = favorites[0];
+      // FavoriteMosque has `mosque_name`
+      sourceName = selectedMosque.mosque_name || selectedMosque.name;
+    }
+    // 2. Fallback to Nearest Mosque (if location available)
+    else if (
+      nearbyMosques &&
+      nearbyMosques.pages &&
+      nearbyMosques.pages.length > 0 &&
+      nearbyMosques.pages[0].mosques.length > 0
+    ) {
+      // nearbyMosques is InfiniteData, so we check pages[0].mosques
+      selectedMosque = nearbyMosques.pages[0].mosques[0];
+      sourceName = selectedMosque.name;
+    }
 
-        // 1. Try Favorites First
-        if (favorites && favorites.length > 0) {
-            selectedMosque = favorites[0];
-            // FavoriteMosque has `mosque_name`
-            sourceName = selectedMosque.mosque_name || selectedMosque.name;
-            console.log("Using Favorite Mosque:", sourceName);
-        }
-        // 2. Fallback to Nearest Mosque (if location available)
-        else if (nearbyMosques && nearbyMosques.pages && nearbyMosques.pages.length > 0 && nearbyMosques.pages[0].mosques.length > 0) {
-             // nearbyMosques is InfiniteData, so we check pages[0].mosques
-            selectedMosque = nearbyMosques.pages[0].mosques[0];
-            sourceName = selectedMosque.name;
-            console.log("Using Nearby Mosque:", sourceName);
-        }
+    if (!selectedMosque) {
+      if (locationError && (!favorites || favorites.length === 0)) {
+        return { error: "Enable location or add a favorite." };
+      } else if (
+        (!favorites || favorites.length === 0) &&
+        !nearbyMosques?.pages?.[0]?.mosques?.length
+      ) {
+        return { error: "No mosques found." };
+      }
+      return {};
+    }
 
-        if (!selectedMosque) {
-            if (locationError && (!favorites || favorites.length === 0)) {
-                setPrayerState({ error: "Enable location or add a favorite." });
-            } else if ((!favorites || favorites.length === 0) && (!nearbyMosques?.pages?.[0]?.mosques?.length)) {
-                 setPrayerState({ error: "No mosques found." });
-            }
-            return;
-        }
+    // Calculate Next Prayer for the selected mosque
+    const now = new Date();
+    const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
 
-        // Calculate Next Prayer for the selected mosque
-        const now = new Date();
-        const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
-        
-        // Find next prayer in timings
-        if (!selectedMosque.prayer_timings) {
-             setPrayerState({ error: "Timings unavailable." });
-             return;
-        }
+    // Find next prayer in timings
+    if (!selectedMosque.prayer_timings) {
+      return { error: "Timings unavailable." };
+    }
 
-        let next = selectedMosque.prayer_timings.find((t: any) => {
-            const [h, m] = t.jamaat_time.split(':').map(Number);
-            return (h * 60 + m) > currentTimeMinutes;
-        });
+    let next = selectedMosque.prayer_timings.find((t: any) => {
+      const [h, m] = t.jamaat_time.split(":").map(Number);
+      return h * 60 + m > currentTimeMinutes;
+    });
 
-        // If no prayer left today, show Fajr of tomorrow (or first in list)
-        if (!next) {
-            next = selectedMosque.prayer_timings[0];
-            // Todo: Handle "tomorrow" logic for countdown correctly
-        }
+    // If no prayer left today, show Fajr of tomorrow (or first in list)
+    if (!next) {
+      next = selectedMosque.prayer_timings[0];
+      // Todo: Handle "tomorrow" logic for countdown correctly
+    }
 
-        if (next) {
-            // Calculate Countdown (Roughly)
-            const [h, m] = next.jamaat_time.split(':').map(Number);
-            let diffMinutes = (h * 60 + m) - currentTimeMinutes;
-            if (diffMinutes < 0) diffMinutes += 24 * 60; // Add 24h if next day
+    if (next) {
+      // Calculate Countdown (Roughly)
+      const [h, m] = next.jamaat_time.split(":").map(Number);
+      let diffMinutes = h * 60 + m - currentTimeMinutes;
+      if (diffMinutes < 0) diffMinutes += 24 * 60; // Add 24h if next day
 
-            const hoursLeft = Math.floor(diffMinutes / 60);
-            const minsLeft = diffMinutes % 60;
-            const countdownStr = `${hoursLeft}h ${minsLeft}m`;
+      const hoursLeft = Math.floor(diffMinutes / 60);
+      const minsLeft = diffMinutes % 60;
+      const countdownStr = `${hoursLeft}h ${minsLeft}m`;
 
-            setPrayerState({
-                nextPrayer: {
-                    name: next.prayer_name,
-                    time: convert24to12(next.jamaat_time)
-                },
-                countdown: countdownStr,
-                source: sourceName
-            });
-        }
-    };
-
-    calculateNextPrayer();
-    // Update every minute (could use interval here in future)
-  }, [favorites, nearbyMosques, location, locationError]);
-
+      return {
+        nextPrayer: {
+          name: next.prayer_name,
+          time: convert24to12(next.jamaat_time),
+        },
+        countdown: countdownStr,
+        source: sourceName,
+      };
+    }
+    return {};
+  }, [favorites, nearbyMosques, locationError]);
 
   const handleHeaderPress = () => {
     const newTapCount = tapCount + 1;
@@ -162,35 +160,39 @@ export default function Home() {
   };
 
   return (
-    <ScrollView 
-        className="flex-1 bg-gray-50 mb-10"
-        showsVerticalScrollIndicator={false}
+    <ScrollView
+      className="flex-1 bg-gray-50 mb-10"
+      showsVerticalScrollIndicator={false}
     >
       {/* Header */}
       <View className="pt-8 px-4 mb-2">
-        <TodayCard 
+        <TodayCard
           onPress={handleHeaderPress}
           nextPrayer={prayerState.nextPrayer}
           countdown={prayerState.countdown}
           source={prayerState.source}
-          isLoading={isFavoritesLoading || (shouldFetchNearby && isNearbyLoading)}
+          isLoading={
+            isFavoritesLoading || (shouldFetchNearby && isNearbyLoading)
+          }
           error={prayerState.error}
         />
-        
+
         <BentoGrid />
 
         {/* Admin Features Section - Only show if role active */}
         <View className="mt-8 gap-4 pb-20">
-            {adminFeatures.map((feature) => {
-              const shouldShow = 
-                (feature.title === "Mosque Claims" && hasRole("admin_approver")) ||
-                (feature.title === "Mosque Management" && hasRole("mosque_admin"));
-              
-              if (shouldShow) {
-                return <FeatureCard key={feature.title} feature={feature} />;
-              }
-              return null;
-            })}
+          {adminFeatures.map((feature) => {
+            const shouldShow =
+              (feature.title === "Mosque Claims" &&
+                hasRole("admin_approver")) ||
+              (feature.title === "Mosque Management" &&
+                hasRole("mosque_admin"));
+
+            if (shouldShow) {
+              return <FeatureCard key={feature.title} feature={feature} />;
+            }
+            return null;
+          })}
         </View>
       </View>
 

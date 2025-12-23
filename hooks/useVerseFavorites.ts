@@ -58,22 +58,23 @@ export const useVerseFavorites = () => {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["favorite-verses"], data.newFavorites);
-      Toast.show({
-        type: "success",
-        text1:
-          data.action === "added"
-            ? "Added to favorites"
-            : "Removed from favorites",
-        visibilityTime: 2000,
-      });
+      // Toast.show({
+      //   type: "success",
+      //   text1:
+      //     data.action === "added"
+      //       ? "Added to favorites"
+      //       : "Removed from favorites",
+      //   visibilityTime: 2000,
+      //   autoHide: true,
+      // });
     },
     onError: () => {
-      Toast.show({
-        type: "error",
-        text1: "Failed to update Favorites",
-        visibilityTime: 3000,
-        autoHide: true,
-      });
+      // Toast.show({
+      //   type: "error",
+      //   text1: "Failed to update Favorites",
+      //   visibilityTime: 3000,
+      //   autoHide: true,
+      // });
     },
   });
 

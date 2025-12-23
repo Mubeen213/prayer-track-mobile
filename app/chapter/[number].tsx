@@ -23,6 +23,8 @@ export default function ChapterPage() {
   const [showTranslation, setShowTranslation] = useState<string>("both");
   const [fontSize, setFontSize] = useState<string>("medium");
   const [visibleVerses, setVisibleVerses] = useState<number[]>([]);
+  const [listReady, setListReady] = useState(false);
+  const scrollAttempted = useRef(false);
 
   const fontSizeOptions = [
     { value: "small", label: "Small" },
@@ -70,30 +72,37 @@ export default function ChapterPage() {
   };
 
   useEffect(() => {
-    if (chapter && verse && flatListRef.current) {
+    if (
+      chapter &&
+      verse &&
+      listReady &&
+      flatListRef.current &&
+      !scrollAttempted.current
+    ) {
       const verseNumber = parseInt(verse);
       const verseIndex = chapter.ayahs.findIndex(
         (ayah: any) => ayah.ayah_number === verseNumber
       );
-      let scrollTimeout = 500;
+
       if (verseIndex !== -1) {
-        const initialRenderCount = Math.max(15, verseIndex + 5);
-        if (initialRenderCount > 100) {
-          scrollTimeout = 1500;
-        } else if (initialRenderCount > 50) {
-          scrollTimeout = 1000;
-        }
+        scrollAttempted.current = true;
+        // Use a longer delay to ensure all items are laid out
         setTimeout(() => {
-          console.log("Attempting to scroll to index:", verseIndex);
+          console.log("Scrolling to verse index:", verseIndex);
           flatListRef.current?.scrollToIndex({
             index: verseIndex,
-            animated: false,
+            animated: true,
             viewPosition: 0.1,
           });
-        }, scrollTimeout);
+        }, 300);
       }
     }
-  }, [chapter, verse]);
+  }, [chapter, verse, listReady]);
+
+  // Reset scroll attempted when verse changes
+  useEffect(() => {
+    scrollAttempted.current = false;
+  }, [verse]);
 
   useEffect(() => {
     if (error && !isLoading) {
@@ -159,14 +168,30 @@ export default function ChapterPage() {
   );
 
   const handleScrollToIndexFailed = (info: any) => {
-    const wait = new Promise((resolve) => setTimeout(resolve, 500));
-    wait.then(() => {
+    console.log("Scroll to index failed, retrying...", info);
+    setTimeout(() => {
       flatListRef.current?.scrollToIndex({
         index: info.index,
-        animated: true,
+        animated: false,
         viewPosition: 0.1,
       });
-    });
+    }, 100);
+  };
+
+  // Estimate item layout for better scrolling performance
+  const getItemLayout = (_: any, index: number) => {
+    const ESTIMATED_ITEM_HEIGHT = 250; // Average height of a verse card
+    return {
+      length: ESTIMATED_ITEM_HEIGHT,
+      offset: ESTIMATED_ITEM_HEIGHT * index,
+      index,
+    };
+  };
+
+  const handleListLayout = () => {
+    if (!listReady) {
+      setListReady(true);
+    }
   };
 
   return (
@@ -193,8 +218,10 @@ export default function ChapterPage() {
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={false}
         maxToRenderPerBatch={20}
-        windowSize={20}
+        windowSize={21}
         initialNumToRender={verse ? Math.max(30, parseInt(verse) + 10) : 30}
+        getItemLayout={getItemLayout}
+        onLayout={handleListLayout}
         onScrollToIndexFailed={handleScrollToIndexFailed}
         onViewableItemsChanged={handleViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}

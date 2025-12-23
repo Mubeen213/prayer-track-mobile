@@ -17,25 +17,25 @@ export const useCreateClaimRequest = () => {
       return response.data;
     },
     onSuccess: () => {
-      Toast.show({
-        type: "success",
-        text1: "Claim Request Submitted",
-        text2: "Your claim request has been submitted successfully",
-        visibilityTime: 3000,
-        autoHide: true,
-      });
+      // Toast.show({
+      //   type: "success",
+      //   text1: "Claim Request Submitted",
+      //   text2: "Your claim request has been submitted successfully",
+      //   visibilityTime: 3000,
+      //   autoHide: true,
+      // });
       queryClient.invalidateQueries({ queryKey: ["my-claims"] });
     },
     onError: (error: any) => {
       const message =
         error.response?.data?.error || "Failed to submit claim request";
-      Toast.show({
-        type: "error",
-        text1: "Submission Failed",
-        text2: message,
-        visibilityTime: 3000,
-        autoHide: true,
-      });
+      // Toast.show({
+      //   type: "error",
+      //   text1: "Submission Failed",
+      //   text2: message,
+      //   visibilityTime: 3000,
+      //   autoHide: true,
+      // });
     },
   });
 };
@@ -94,26 +94,26 @@ export const useUpdateClaimStatus = () => {
         rejected: "Claim rejected",
       };
 
-      Toast.show({
-        type: variables.status === "approved" ? "success" : "info",
-        text1: "Status Updated",
-        text2: statusMessages[variables.status],
-        visibilityTime: 3000,
-        autoHide: true,
-      });
+      // Toast.show({
+      //   type: variables.status === "approved" ? "success" : "info",
+      //   text1: "Status Updated",
+      //   text2: statusMessages[variables.status],
+      //   visibilityTime: 3000,
+      //   autoHide: true,
+      // });
 
       queryClient.invalidateQueries({ queryKey: ["claim-requests"] });
     },
     onError: (error: any) => {
       const message =
         error.response?.data?.error || "Failed to update claim status";
-      Toast.show({
-        type: "error",
-        text1: "Update Failed",
-        text2: message,
-        visibilityTime: 3000,
-        autoHide: true,
-      });
+      // Toast.show({
+      //   type: "error",
+      //   text1: "Update Failed",
+      //   text2: message,
+      //   visibilityTime: 3000,
+      //   autoHide: true,
+      // });
     },
   });
 };

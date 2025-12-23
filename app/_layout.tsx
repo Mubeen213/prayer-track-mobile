@@ -26,12 +26,12 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     if (syncError) {
-      Toast.show({
-        type: "error",
-        text1: "Sync Error",
-        text2: syncError,
-        visibilityTime: 4000,
-      });
+      // Toast.show({
+      //   type: "error",
+      //   text1: "Sync Error",
+      //   text2: syncError,
+      //   visibilityTime: 4000,
+      // });
     }
   }, [syncError]);
 
@@ -81,7 +81,7 @@ export default function RootLayout() {
             <AppContent />
           </SafeAreaView>
         </AuthProvider>
-        <Toast  />
+        <Toast position="top" topOffset={60} />
       </SafeAreaProvider>
     </QueryClientProvider>
   );
