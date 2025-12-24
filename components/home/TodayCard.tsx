@@ -71,12 +71,12 @@ export const TodayCard: React.FC<TodayCardProps> = ({
             ) : error ? (
                 <View>
                      <Text className="text-white text-2xl font-bold mb-1">No Timings</Text>
-                     <Text className="text-violet-200 text-sm">Add favorite mosque or enable location</Text>
+                     <Text className="text-violet-200 text-sm">Add favorite mosque to view timings</Text>
                 </View>
             ) : (
                 <View>
                      <Text className="text-white text-2xl font-bold mb-1">Setup Prayer Times</Text>
-                     <Text className="text-violet-200 text-sm">Favorite a mosque or enable location</Text>
+                     <Text className="text-violet-200 text-sm">Favorite a mosque</Text>
                 </View>
             )}
         </View>
