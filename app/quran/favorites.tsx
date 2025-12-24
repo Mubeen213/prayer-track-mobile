@@ -37,11 +37,11 @@ export default function FavoritesPage() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      <View style={{ paddingTop: insets.top }} className="bg-white shadow-sm border-b border-gray-100 z-10">
-        <View className="px-4 py-4 flex-row items-center gap-4">
+      <View style={{ paddingTop: insets.top }} className="shadow-sm border-b border-gray-100 z-10">
+        <View className="px-4 pb-4 flex-row items-center gap-4">
           <TouchableOpacity
             onPress={() => router.back()}
-            className="p-2 rounded-full bg-gray-100"
+            className="rounded-full bg-gray-100"
           >
             <ArrowLeft size={20} color="#374151" />
           </TouchableOpacity>
