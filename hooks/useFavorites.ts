@@ -33,10 +33,12 @@ export const useFavoritesMutation = (userId: string | null) => {
         restored: "Mosque restored to favorites",
       };
 
-      Toast.show({
-        type: "success",
-        text1: messages[data.data.action],
-      });
+      // Toast.show({
+      //   type: "success",
+      //   text1: messages[data.data.action],
+      //   autoHide: true,
+      //   visibilityTime: 2000,
+      // });
 
       if (userId) {
         await FavoriteService.syncFavorites(userId, true);
@@ -61,10 +63,10 @@ export const useFavoritesMutation = (userId: string | null) => {
       }
     },
     onError: () => {
-      Toast.show({
-        type: "error",
-        text1: "Failed to update favorites",
-      });
+      // Toast.show({
+      //   type: "error",
+      //   text1: "Failed to update favorites",
+      // });
     },
   });
 };

@@ -1,19 +1,122 @@
-import React from "react";
-import { Text, View, ScrollView, Pressable, Modal, Alert } from "react-native";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  View,
+  ScrollView,
+  Pressable,
+  Modal,
+  Alert,
+  Text,
+  ActivityIndicator,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { FeatureCard } from "../../components/common/FeatureCard";
+import { TodayCard } from "../../components/home/TodayCard";
+import { BentoGrid } from "../../components/home/BentoGrid";
 import { features, adminFeatures } from "../../constants/features";
 import { useAuth } from "../../hooks/useAuth";
 import * as Clipboard from "expo-clipboard";
+import { useGetFavoriteMosques } from "../../hooks/useFavorites";
+import { useLocation } from "../../hooks/useLocation";
+import { useNearbyMosques } from "../../hooks/useMosques";
+import { convert24to12 } from "../../utils/timeConversions";
 
 export default function Home() {
-  const { user, hasRole } = useAuth();
+  const { user, hasRole, userId } = useAuth();
   const [showUserIdModal, setShowUserIdModal] = React.useState(false);
   const [tapCount, setTapCount] = React.useState(0);
   const tapTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
+
+  // Data Hooks
+  const { data: favorites = [], isLoading: isFavoritesLoading } =
+    useGetFavoriteMosques(userId || null);
+
+  const { location, error: locationError } = useLocation();
+  // We only fetch nearby mosques if we have location and no favorites to prioritize
+  const shouldFetchNearby = !favorites || favorites.length === 0;
+  const { data: nearbyMosques, isLoading: isNearbyLoading } = useNearbyMosques(
+    shouldFetchNearby ? location?.latitude || null : null,
+    shouldFetchNearby ? location?.longitude || null : null
+  );
+
+  // Logic to determine Next Prayer - use useMemo to prevent infinite loops
+  const prayerState = useMemo(() => {
+    let selectedMosque: any = null;
+    let sourceName = "";
+
+    // 1. Try Favorites First
+    if (favorites && favorites.length > 0) {
+      selectedMosque = favorites[0];
+      // FavoriteMosque has `mosque_name`
+      sourceName = selectedMosque.mosque_name || selectedMosque.name;
+    }
+    // 2. Fallback to Nearest Mosque (if location available)
+    else if (
+      nearbyMosques &&
+      nearbyMosques.pages &&
+      nearbyMosques.pages.length > 0 &&
+      nearbyMosques.pages[0].mosques.length > 0
+    ) {
+      // nearbyMosques is InfiniteData, so we check pages[0].mosques
+      selectedMosque = nearbyMosques.pages[0].mosques[0];
+      sourceName = selectedMosque.name;
+    }
+
+    if (!selectedMosque) {
+      if (locationError && (!favorites || favorites.length === 0)) {
+        return { error: "Enable location or add a favorite." };
+      } else if (
+        (!favorites || favorites.length === 0) &&
+        !nearbyMosques?.pages?.[0]?.mosques?.length
+      ) {
+        return { error: "No mosques found." };
+      }
+      return {};
+    }
+
+    // Calculate Next Prayer for the selected mosque
+    const now = new Date();
+    const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
+
+    // Find next prayer in timings
+    if (!selectedMosque.prayer_timings) {
+      return { error: "Timings unavailable." };
+    }
+
+    let next = selectedMosque.prayer_timings.find((t: any) => {
+      const [h, m] = t.jamaat_time.split(":").map(Number);
+      return h * 60 + m > currentTimeMinutes;
+    });
+
+    // If no prayer left today, show Fajr of tomorrow (or first in list)
+    if (!next) {
+      next = selectedMosque.prayer_timings[0];
+      // Todo: Handle "tomorrow" logic for countdown correctly
+    }
+
+    if (next) {
+      // Calculate Countdown (Roughly)
+      const [h, m] = next.jamaat_time.split(":").map(Number);
+      let diffMinutes = h * 60 + m - currentTimeMinutes;
+      if (diffMinutes < 0) diffMinutes += 24 * 60; // Add 24h if next day
+
+      const hoursLeft = Math.floor(diffMinutes / 60);
+      const minsLeft = diffMinutes % 60;
+      const countdownStr = `${hoursLeft}h ${minsLeft}m`;
+
+      return {
+        nextPrayer: {
+          name: next.prayer_name,
+          time: convert24to12(next.jamaat_time),
+        },
+        countdown: countdownStr,
+        source: sourceName,
+      };
+    }
+    return {};
+  }, [favorites, nearbyMosques, locationError]);
 
   const handleHeaderPress = () => {
     const newTapCount = tapCount + 1;
@@ -58,78 +161,38 @@ export default function Home() {
 
   return (
     <ScrollView
+      className="flex-1 bg-gray-50 mb-10"
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 100 }}
-      className="bg-gray-50 mb-10"
     >
       {/* Header */}
-      <View className="pt-8 px-4">
-        <Pressable onPress={handleHeaderPress}>
-          <LinearGradient
-            colors={["#667eea", "#764ba2"]}
-            style={{
-              padding: 20,
-              borderRadius: 16,
-            }}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <LinearGradient
-                colors={["#ffffff", "#f8f9fa"]}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginRight: 12,
-                }}
-              >
-                <Ionicons name="calendar-outline" size={20} color="#667eea" />
-              </LinearGradient>
-              <View>
-                <Text className="text-white font-semibold text-lg">Today</Text>
-                <Text className="text-white/80 text-sm">
-                  {new Date().toLocaleDateString("en-US", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </Text>
-              </View>
-            </View>
-          </LinearGradient>
-        </Pressable>
+      <View className="pt-8 px-4 mb-2">
+        <TodayCard
+          onPress={handleHeaderPress}
+          nextPrayer={prayerState.nextPrayer}
+          countdown={prayerState.countdown}
+          source={prayerState.source}
+          isLoading={
+            isFavoritesLoading || (shouldFetchNearby && isNearbyLoading)
+          }
+          error={prayerState.error}
+        />
 
-        {/* Feature Cards */}
-        <View className="mt-6">
-          <View className="gap-4">
-            {features.map((feature) => (
-              <FeatureCard key={feature.title} feature={feature} />
-            ))}
-          </View>
-        </View>
+        <BentoGrid />
 
-        {/* Admin Feature Cards */}
-        <View className="mt-6">
-          <View className="gap-4">
-            {adminFeatures.map((feature) => {
-              if (
-                feature.title === "Mosque Claims" &&
-                hasRole("admin_approver")
-              ) {
-                return <FeatureCard key={feature.title} feature={feature} />;
-              } else if (
-                feature.title === "Mosque Management" &&
-                hasRole("mosque_admin")
-              ) {
-                return <FeatureCard key={feature.title} feature={feature} />;
-              }
-              return null;
-            })}
-          </View>
+        {/* Admin Features Section - Only show if role active */}
+        <View className="mt-8 gap-4 pb-20">
+          {adminFeatures.map((feature) => {
+            const shouldShow =
+              (feature.title === "Mosque Claims" &&
+                hasRole("admin_approver")) ||
+              (feature.title === "Mosque Management" &&
+                hasRole("mosque_admin"));
+
+            if (shouldShow) {
+              return <FeatureCard key={feature.title} feature={feature} />;
+            }
+            return null;
+          })}
         </View>
       </View>
 

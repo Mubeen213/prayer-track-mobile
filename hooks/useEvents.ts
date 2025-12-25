@@ -61,18 +61,22 @@ export const useCreateEvent = () => {
         type: "active",
       });
 
-      Toast.show({
-        type: "success",
-        text1: "Event Created Successfully",
-        text2: "Your event has been created successfully",
-      });
+      // Toast.show({
+      //   type: "success",
+      //   text1: "Event Created Successfully",
+      //   text2: "Your event has been created successfully",
+      //   visibilityTime: 3000,
+      //   autoHide: true,
+      // });
     },
     onError: () => {
-      Toast.show({
-        type: "error",
-        text1: "Failed to Create Event",
-        text2: "There was an error creating your event",
-      });
+      // Toast.show({
+      //   type: "error",
+      //   text1: "Failed to Create Event",
+      //   text2: "There was an error creating your event",
+      //   visibilityTime: 3000,
+      //   autoHide: true,
+      // });
     },
   });
 };
@@ -108,18 +112,22 @@ export const useUpdateEvent = () => {
         type: "active",
       });
 
-      Toast.show({
-        type: "success",
-        text1: "Event Updated Successfully",
-        text2: "Your event has been updated successfully",
-      });
+      // Toast.show({
+      //   type: "success",
+      //   text1: "Event Updated Successfully",
+      //   text2: "Your event has been updated successfully",
+      //   visibilityTime: 3000,
+      //   autoHide: true,
+      // });
     },
     onError: () => {
-      Toast.show({
-        type: "error",
-        text1: "Failed to Update Event",
-        text2: "There was an error updating your event",
-      });
+      // Toast.show({
+      //   type: "error",
+      //   text1: "Failed to Update Event",
+      //   text2: "There was an error updating your event",
+      //   visibilityTime: 3000,
+      //   autoHide: true,
+      // });
     },
   });
 };
@@ -163,18 +171,22 @@ export const useDeleteEvent = () => {
         type: "active",
       });
 
-      Toast.show({
-        type: "success",
-        text1: "Event Deleted Successfully",
-        text2: "Your event has been deleted successfully",
-      });
+      // Toast.show({
+      //   type: "success",
+      //   text1: "Event Deleted Successfully",
+      //   text2: "Your event has been deleted successfully",
+      //   visibilityTime: 3000,
+      //   autoHide: true,
+      // });
     },
     onError: () => {
-      Toast.show({
-        type: "error",
-        text1: "Failed to Delete Event",
-        text2: "There was an error deleting your event",
-      });
+      // Toast.show({
+      //   type: "error",
+      //   text1: "Failed to Delete Event",
+      //   text2: "There was an error deleting your event",
+      //   visibilityTime: 3000,
+      //   autoHide: true,
+      // });
     },
   });
 };

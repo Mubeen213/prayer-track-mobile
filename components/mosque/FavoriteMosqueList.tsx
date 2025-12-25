@@ -74,14 +74,17 @@ export const FavoriteMosqueList = () => {
   return (
     <FlatList
       data={favorites}
-      renderItem={({ item }) => (
-        <MosqueCard
-          mosque={transformToMosque(item)}
-          onPress={handleMosquePress}
-          isFavorite={true}
-          onToggleFavorite={handleToggleFavorite}
-        />
-      )}
+      renderItem={({ item }) => {
+        const mosque = transformToMosque(item);
+        return (
+            <MosqueCard
+            mosque={mosque}
+            onPress={() => handleMosquePress(mosque)}
+            isFavorite={true}
+            onToggleFavorite={handleToggleFavorite}
+            />
+        );
+      }}
       keyExtractor={(item) => item.id}
       contentContainerStyle={{ paddingVertical: 8 }}
       className="bg-gray-50"
